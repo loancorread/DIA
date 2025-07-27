@@ -1,290 +1,229 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cronograma de Aplicación DIA Intermedio</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts - Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    /* Estilos para los post-its, manteniendo la rotación */
-    .postit {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      font-weight: bold;
-      transition: transform 0.3s ease-in-out;
-    }
-    .postit:hover {
-      transform: scale(1.05);
-    }
-    /* Clases de rotación para los post-its */
-    .rotate-0 { transform: rotate(0deg); }
-    .rotate-1 { transform: rotate(2deg); }
-    .rotate-2 { transform: rotate(4deg); }
-    .rotate-neg1 { transform: rotate(-2deg); }
-    .rotate-neg2 { transform: rotate(-4deg); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma DIA</title>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general body defaults */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Ensure select boxes have consistent styling */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5rem 1.5rem;
+            padding-right: 2.5rem; /* Space for the custom arrow */
+        }
+    </style>
+    <script>
+        // JavaScript function to filter the table based on selected criteria
+        function filtrarTabla() {
+            // Get filter values, converting them to lowercase for case-insensitive comparison
+            const tipo = document.getElementById("tipoFiltro").value.toLowerCase();
+            const curso = document.getElementById("cursoFiltro").value.toLowerCase();
+            const dia = document.getElementById("diaFiltro").value.toLowerCase();
+
+            // Select all table rows within the tbody
+            const filas = document.querySelectorAll("#tablaCronograma tbody tr");
+
+            // Iterate over each row to apply filtering
+            filas.forEach(fila => {
+                // Get the full text content of the row and convert to lowercase
+                const textoFila = fila.textContent.toLowerCase();
+
+                // Determine if the row should be displayed based on all filters
+                const mostrar =
+                    (tipo === "todos" || textoFila.includes(tipo)) && // Filter by type
+                    (curso === "todos" || textoFila.includes(curso)) && // Filter by course
+                    (dia === "todos" || textoFila.includes(dia)); // Filter by day/week
+
+                // Set the display style of the row
+                fila.style.display = mostrar ? "" : "none";
+            });
+        }
+    </script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 p-4 sm:p-8">
+<body class="bg-gray-50 text-gray-800 p-4 sm:p-6 md:p-8">
 
-  <header class="mb-10">
-    <h1 class="text-4xl font-extrabold text-center text-blue-700 mb-2 drop-shadow-md">
-      Cronograma de Aplicación DIA Intermedio
-    </h1>
-    <p class="text-xl text-center text-gray-600">
-      Escuela Intercultural Kallfü Mapu
-    </p>
-  </header>
+    <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-6 sm:p-8 md:p-10">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-indigo-700 mb-2">Cronograma de Aplicación del DIA</h1>
+        <h2 class="text-xl sm:text-2xl text-center text-gray-600 mb-8">Periodo: Martes 29 de julio al Miércoles 13 de agosto de 2025</h2>
 
-  <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl p-6">
-    <!-- Controles de pestañas -->
-    <div class="flex justify-center mb-8">
-      <button
-        id="gantt-tab-btn"
-        class="px-6 py-3 text-lg font-semibold rounded-l-lg transition-all duration-300 bg-blue-600 text-white shadow-md"
-      >
-        Gráfico de Gantt
-      </button>
-      <button
-        id="postit-tab-btn"
-        class="px-6 py-3 text-lg font-semibold rounded-r-lg transition-all duration-300 bg-gray-200 text-gray-700 hover:bg-blue-100"
-      >
-        Post-it Visual
-      </button>
+        <!-- Filter Section -->
+        <div class="filtros flex flex-wrap justify-center items-center gap-4 mb-8 p-4 bg-indigo-50 rounded-lg shadow-md">
+            <div class="flex flex-col sm:flex-row items-center gap-2">
+                <label for="tipoFiltro" class="font-semibold text-indigo-700">Filtrar por tipo de evaluación:</label>
+                <select id="tipoFiltro" onchange="filtrarTabla()"
+                    class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                    <option value="todos">Todos</option>
+                    <option value="lectura">Lectura</option>
+                    <option value="matemática">Matemática</option>
+                    <option value="socioem">Socioemocional</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-2">
+                <label for="cursoFiltro" class="font-semibold text-indigo-700">Filtrar por curso:</label>
+                <select id="cursoFiltro" onchange="filtrarTabla()"
+                    class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                    <option value="todos">Todos</option>
+                    <option value="2°a">2°A</option>
+                    <option value="3°a">3°A</option>
+                    <option value="4°a">4°A</option>
+                    <option value="5°a">5°A</option>
+                    <option value="6°a">6°A</option>
+                    <option value="7°a">7°A</option>
+                    <option value="8°a">8°A</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-2">
+                <label for="diaFiltro" class="font-semibold text-indigo-700">Filtrar por día/semana:</label>
+                <select id="diaFiltro" onchange="filtrarTabla()"
+                    class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                    <option value="todos">Todos</option>
+                    <option value="lunes">Lunes</option>
+                    <option value="martes">Martes</option>
+                    <option value="miércoles">Miércoles</option>
+                    <option value="jueves">Jueves</option>
+                    <option value="viernes">Viernes</option>
+                    <option value="semana 1">Semana 1</option>
+                    <option value="semana 2">Semana 2</option>
+                    <option value="semana 3">Semana 3</option>
+                </select>
+            </div>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-semibold text-center text-indigo-700 mb-6">Gráfico de Gantt</h2>
+
+        <!-- Table Section -->
+        <div class="overflow-x-auto rounded-lg shadow-xl">
+            <table id="tablaCronograma" class="min-w-full divide-y divide-indigo-200">
+                <thead class="bg-indigo-600">
+                    <tr>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider rounded-tl-lg">Semana/Día</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B1</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B2</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B3 (45min)</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider rounded-tr-lg">B4 (45min)</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- Table Rows -->
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Martes</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G1 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G2 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G3 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Lectura</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Miércoles</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Lectura</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Jueves</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G3 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Matemática</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Viernes</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Matemática</td>
+                        <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">4°A G3 Socioem.</td>
+                        <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">5°A G1 Socioem.</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Lunes</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G2 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G3 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G1 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G2 Lectura</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Martes</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G3 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G1 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G2 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G3 Matemática</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Miércoles</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G1 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G2 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G3 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G1 Lectura</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Jueves</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G2 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G3 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G1 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G2 Lectura</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Viernes</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G3 Lectura</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G1 Matemática</td>
+                        <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">7°A G2 Socioem.</td>
+                        <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">7°A G3 Socioem.</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Lunes</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G1 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G2 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G3 Matemática</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G1 Socioem.</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Martes</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G2 Socioem.</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G3 Socioem.</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Socioem.</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Socioem.</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Miércoles</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Socioem.</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Socioem.</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Socioem.</td>
+                        <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G3 Socioem.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Legend Section -->
+        <div class="leyenda mt-8 p-6 bg-gray-100 rounded-xl shadow-md text-gray-700">
+            <strong class="text-lg font-semibold text-indigo-700">Leyenda:</strong>
+            <ul class="list-disc list-inside mt-2 space-y-2">
+                <li>
+                    <span class="inline-block w-6 h-4 bg-green-100 rounded-sm mr-2 align-middle"></span>
+                    <span class="align-middle">Bloque largo (90 minutos)</span>
+                </li>
+                <li>
+                    <span class="inline-block w-6 h-4 bg-yellow-100 rounded-sm mr-2 align-middle"></span>
+                    <span class="align-middle">Bloque corto (45 minutos, solo viernes)</span>
+                </li>
+                <li class="mt-4 text-sm text-gray-600">Utiliza los filtros para ver el cronograma por tipo de evaluación, curso y día o semana.</li>
+            </ul>
+        </div>
     </div>
 
-    <!-- Contenido de las pestañas -->
-    <section id="gantt-section" class="mb-10">
-      <h2 class="text-3xl font-bold text-center text-gray-700 mb-6">Gráfico de Gantt</h2>
-      <div class="overflow-x-auto shadow-lg rounded-lg">
-        <table class="min-w-full bg-white rounded-lg">
-          <thead>
-            <tr>
-              <th class="py-3 px-4 bg-green-600 text-white font-semibold rounded-tl-lg">Semana/Día</th>
-              <th class="py-3 px-4 bg-green-600 text-white font-semibold">B1</th>
-              <th class="py-3 px-4 bg-green-600 text-white font-semibold">B2</th>
-              <th class="py-3 px-4 bg-green-600 text-white font-semibold">B3</th>
-              <th class="py-3 px-4 bg-green-600 text-white font-semibold rounded-tr-lg">B4</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Semana 1 -->
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 1 - Lunes</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">2°A G1 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">2°A G2 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">3°A G1 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">3°A G2 Lectura</td>
-            </tr>
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 1 - Martes</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">3°A G1 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">3°A G2 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">4°A G1 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">4°A G2 Lectura</td>
-            </tr>
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 1 - Miércoles</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">4°A G1 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">4°A G2 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">4°A G1 Socioemocional</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">4°A G2 Socioemocional</td>
-            </tr>
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 1 - Jueves</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">5°A G1 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">5°A G2 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">5°A G1 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">5°A G2 Matemática</td>
-            </tr>
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 1 - Viernes</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">5°A G1 Socioem.</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">5°A G2 Socioem.</td>
-              <td class="py-3 px-4 text-center bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200 rounded-md m-1">6°A G1 Socioem.</td>
-              <td class="py-3 px-4 text-center bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200 rounded-md m-1">6°A G2 Socioem.</td>
-            </tr>
-            <!-- Semana 2 -->
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 2 - Lunes</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">6°A G1 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">6°A G2 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">6°A G1 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">6°A G2 Matemática</td>
-            </tr>
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 2 - Martes</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">7°A G1 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">7°A G2 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">7°A G1 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">7°A G2 Matemática</td>
-            </tr>
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 2 - Miércoles</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">7°A G1 Socioem.</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">7°A G2 Socioem.</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">8°A G1 Lectura</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">8°A G2 Lectura</td>
-            </tr>
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 2 - Jueves</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">8°A G1 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">8°A G2 Matemática</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">8°A G1 Socioem.</td>
-              <td class="py-3 px-4 text-center bg-green-100 hover:bg-green-200 transition-colors duration-200 rounded-md m-1">8°A G2 Socioem.</td>
-            </tr>
-            <tr class="border-b border-gray-200 last:border-b-0">
-              <td class="py-3 px-4 text-center font-medium bg-gray-50">Semana 2 - Viernes</td>
-              <td class="py-3 px-4 text-center bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200 rounded-md m-1">Rezagados Lect/Mat</td>
-              <td class="py-3 px-4 text-center bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200 rounded-md m-1">Rezagados Lect/Mat</td>
-              <td class="py-3 px-4 text-center bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200 rounded-md m-1">Rezagados Socioem.</td>
-              <td class="py-3 px-4 text-center bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200 rounded-md m-1">Rezagados Socioem.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="postit-section" class="hidden">
-      <h2 class="text-3xl font-bold text-center text-gray-700 mb-6">Post-it Visual</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 justify-items-center">
-        <!-- Post-its -->
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-blue-200 rotate-neg2">
-          <span class="text-base mb-1">Semana 1 Lunes</span>
-          <span class="text-sm">2° Lectura G1/G2</span>
-          <span class="text-sm">3° Lectura G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-green-200 rotate-1">
-          <span class="text-base mb-1">Semana 1 Martes</span>
-          <span class="text-sm">3° Matemática G1/G2</span>
-          <span class="text-sm">4° Lectura G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-yellow-200 rotate-neg1">
-          <span class="text-base mb-1">Semana 1 Miércoles</span>
-          <span class="text-sm">4° Matemática G1/G2</span>
-          <span class="text-sm">4° Socioemocional G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-orange-200 rotate-2">
-          <span class="text-base mb-1">Semana 1 Jueves</span>
-          <span class="text-sm">5° Lectura G1/G2</span>
-          <span class="text-sm">5° Matemática G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-purple-200 rotate-neg2">
-          <span class="text-base mb-1">Semana 1 Viernes</span>
-          <span class="text-sm">5° Socioem. G1/G2</span>
-          <span class="text-sm">6° Socioem. G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-blue-200 rotate-1">
-          <span class="text-base mb-1">Semana 2 Lunes</span>
-          <span class="text-sm">6° Lectura G1/G2</span>
-          <span class="text-sm">6° Matemática G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-green-200 rotate-neg1">
-          <span class="text-base mb-1">Semana 2 Martes</span>
-          <span class="text-sm">7° Lectura G1/G2</span>
-          <span class="text-sm">7° Matemática G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-yellow-200 rotate-2">
-          <span class="text-base mb-1">Semana 2 Miércoles</span>
-          <span class="text-sm">7° Socioem. G1/G2</span>
-          <span class="text-sm">8° Lectura G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-orange-200 rotate-neg2">
-          <span class="text-base mb-1">Semana 2 Jueves</span>
-          <span class="text-sm">8° Matemática G1/G2</span>
-          <span class="text-sm">8° Socioem. G1/G2</span>
-        </div>
-        <div class="postit w-full max-w-xs h-48 p-4 shadow-md rounded-lg text-sm bg-purple-200 rotate-1">
-          <span class="text-base mb-1">Semana 2 Viernes</span>
-          <span class="text-sm">Rezagados</span>
-          <span class="text-sm">Lect/Mat/Socioem.</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Información Complementaria -->
-    <section class="mt-10 pt-8 border-t border-gray-200">
-      <h2 class="text-3xl font-bold text-center text-gray-700 mb-6">Información Complementaria</h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <!-- Horarios de Lunes a Jueves -->
-        <div class="bg-blue-50 p-6 rounded-lg shadow-md">
-          <h3 class="text-2xl font-semibold text-blue-800 mb-4">Horarios (Lunes a Jueves)</h3>
-          <ul class="list-disc list-inside space-y-2 text-lg text-gray-700">
-            <li><span class="font-bold">B1:</span> 08:15 - 09:45</li>
-            <li><span class="font-bold">B2:</span> 10:05 - 11:35</li>
-            <li><span class="font-bold">B3:</span> 11:55 - 13:25</li>
-            <li><span class="font-bold">B4:</span> 14:10 - 15:40</li>
-          </ul>
-        </div>
-
-        <!-- Horarios de Viernes -->
-        <div class="bg-green-50 p-6 rounded-lg shadow-md">
-          <h3 class="text-2xl font-semibold text-green-800 mb-4">Horarios (Viernes)</h3>
-          <ul class="list-disc list-inside space-y-2 text-lg text-gray-700">
-            <li><span class="font-bold">B1:</span> 08:15 - 09:45</li>
-            <li><span class="font-bold">B2:</span> 10:00 - 11:30</li>
-            <li><span class="font-bold">B3:</span> 11:45 - 12:30</li>
-            <li><span class="font-bold">B4:</span> 13:00 - 13:45</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Fechas de las Semanas -->
-      <div class="bg-yellow-50 p-6 rounded-lg shadow-md text-center">
-        <h3 class="text-2xl font-semibold text-yellow-800 mb-4">Fechas de Aplicación</h3>
-        <p class="text-lg text-gray-700 mb-2">
-          <span class="font-bold">Primera Semana:</span> 28 de julio al 01 de agosto
-        </p>
-        <p class="text-lg text-gray-700">
-          <span class="font-bold">Segunda Semana:</span> 04 de agosto al 08 de agosto
-        </p>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    // Obtener referencias a los elementos
-    const ganttTabBtn = document.getElementById('gantt-tab-btn');
-    const postitTabBtn = document.getElementById('postit-tab-btn');
-    const ganttSection = document.getElementById('gantt-section');
-    const postitSection = document.getElementById('postit-section');
-
-    // Función para mostrar la pestaña seleccionada
-    function showTab(tabName) {
-      if (tabName === 'gantt') {
-        ganttSection.classList.remove('hidden');
-        postitSection.classList.add('hidden');
-        ganttTabBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
-        ganttTabBtn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-blue-100');
-        postitTabBtn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
-        postitTabBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-blue-100');
-      } else if (tabName === 'postit') {
-        postitSection.classList.remove('hidden');
-        ganttSection.classList.add('hidden');
-        postitTabBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
-        postitTabBtn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-blue-100');
-        ganttTabBtn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
-        ganttTabBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-blue-100');
-      }
-    }
-
-    // Añadir event listeners a los botones de las pestañas
-    ganttTabBtn.addEventListener('click', () => showTab('gantt'));
-    postitTabBtn.addEventListener('click', () => showTab('postit'));
-
-    // Inicializar la vista en la pestaña de Gantt al cargar la página
-    document.addEventListener('DOMContentLoaded', () => {
-      showTab('gantt');
-    });
-  </script>
 </body>
 </html>
