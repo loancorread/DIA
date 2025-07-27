@@ -3,57 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizador de Grupos por Curso</title>
+    <title>Cronograma DIA y Distribución de Estudiantes</title>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Custom styles for Inter font and general body defaults */
         body {
-            font-family: "Inter", sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
+            font-family: 'Inter', sans-serif;
         }
-        .tab-button {
-            transition: all 0.3s ease;
+        /* Ensure select boxes have consistent styling */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5rem 1.5rem;
+            padding-right: 2.5rem; /* Space for the custom arrow */
         }
-        .tab-button.active {
-            background-color: #4f46e5;
-            color: white;
-        }
-        .accordion-header {
-            transition: background-color 0.3s ease;
-        }
-        .accordion-header:hover {
-            background-color: #e0e7ff;
-        }
+        /* Accordion specific styles */
         .accordion-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-out, padding 0.5s ease-out;
         }
         .accordion-content.active {
-            max-height: 1000px; /* Suficientemente grande para contener el contenido */
+            max-height: 1000px; /* Sufficiently large to contain the content */
             padding-top: 1rem;
             padding-bottom: 1rem;
         }
     </style>
-</head>
-<body class="p-6">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-        <h1 class="text-4xl font-extrabold text-center text-indigo-700 mb-8">Organizador de Grupos por Curso</h1>
-
-        <!-- Contenedor de pestañas para los cursos -->
-        <div class="flex flex-wrap justify-center mb-6 border-b-2 border-indigo-200">
-            <!-- Los botones de las pestañas se generarán aquí -->
-        </div>
-
-        <!-- Contenedor para el contenido de las pestañas -->
-        <div id="tab-content">
-            <!-- El contenido de las pestañas (grupos de estudiantes) se generará aquí -->
-        </div>
-    </div>
-
     <script>
-        // Datos de los estudiantes extraídos de los PDFs
+        // Data for student distribution by course
         const coursesData = {
             "2º básico A": [
                 {"N/L": "1", "RUN": "26125945-1", "Nombre": "ACEVEDO MATAMALA JOSEFA ISIDORA", "Observaciones": ""},
@@ -334,9 +318,9 @@
             ]
         };
 
-        // Función para organizar estudiantes en grupos
+        // Function to organize students into groups
         function organizeIntoGroups(students) {
-            // Filtrar estudiantes retirados
+            // Filter out retired students
             const activeStudents = students.filter(student => !student.Observaciones.includes("RET."));
             const numStudents = activeStudents.length;
             const groupSize = Math.floor(numStudents / 3);
@@ -350,14 +334,14 @@
 
             let studentIndex = 0;
 
-            // Distribuir estudiantes en los grupos
+            // Distribute students into groups
             for (let i = 0; i < groupSize; i++) {
                 groups.G1.push(activeStudents[studentIndex++]);
                 groups.G2.push(activeStudents[studentIndex++]);
                 groups.G3.push(activeStudents[studentIndex++]);
             }
 
-            // Distribuir el resto de estudiantes
+            // Distribute remaining students
             if (remainder === 1) {
                 groups.G1.push(activeStudents[studentIndex++]);
             } else if (remainder === 2) {
@@ -368,7 +352,7 @@
             return groups;
         }
 
-        // Función para renderizar los grupos de un curso
+        // Function to render groups for a course
         function renderCourseGroups(courseName, students) {
             const groups = organizeIntoGroups(students);
             let html = '';
@@ -390,54 +374,37 @@
             return html;
         }
 
-        // Renderizar pestañas y contenido inicial
-        const tabButtonsContainer = document.querySelector('.flex.flex-wrap');
-        const tabContentContainer = document.getElementById('tab-content');
-        let firstCourse = true;
+        // JavaScript function to filter the table based on selected criteria
+        function filtrarTabla() {
+            // Get filter values, converting them to lowercase for case-insensitive comparison
+            const tipo = document.getElementById("tipoFiltro").value.toLowerCase();
+            const curso = document.getElementById("cursoFiltro").value.toLowerCase();
+            const dia = document.getElementById("diaFiltro").value.toLowerCase();
 
-        for (const courseName in coursesData) {
-            // Crear botón de pestaña
-            const button = document.createElement('button');
-            button.className = `tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 ${firstCourse ? 'active bg-indigo-700 text-white' : 'text-indigo-700 hover:bg-indigo-100'}`;
-            button.textContent = courseName;
-            button.setAttribute('data-course', courseName);
-            tabButtonsContainer.appendChild(button);
+            // Select all table rows within the tbody
+            const filas = document.querySelectorAll("#tablaCronograma tbody tr");
 
-            // Crear contenido de la pestaña
-            const contentDiv = document.createElement('div');
-            contentDiv.id = `content-${courseName.replace(/\s/g, '-')}`;
-            contentDiv.className = `tab-pane ${firstCourse ? 'block' : 'hidden'}`;
-            contentDiv.innerHTML = renderCourseGroups(courseName, coursesData[courseName]);
-            tabContentContainer.appendChild(contentDiv);
+            // Iterate over each row to apply filtering
+            filas.forEach(fila => {
+                // Get the full text content of the row and convert to lowercase
+                const textoFila = fila.textContent.toLowerCase();
 
-            firstCourse = false;
+                // Determine if the row should be displayed based on all filters
+                const mostrar =
+                    (tipo === "todos" || textoFila.includes(tipo)) && // Filter by type
+                    (curso === "todos" || textoFila.includes(curso)) && // Filter by course
+                    (dia === "todos" || textoFila.includes(dia)); // Filter by day/week
+
+                // Set the display style of the row
+                fila.style.display = mostrar ? "" : "none";
+            });
         }
 
-        // Lógica para cambiar de pestaña
-        tabButtonsContainer.addEventListener('click', (event) => {
-            const clickedButton = event.target.closest('.tab-button');
-            if (!clickedButton) return;
-
-            // Remover clase 'active' de todos los botones y ocultar todos los contenidos
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active', 'bg-indigo-700', 'text-white');
-                btn.classList.add('text-indigo-700', 'hover:bg-indigo-100');
-            });
-            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
-
-            // Añadir clase 'active' al botón clickeado y mostrar el contenido correspondiente
-            clickedButton.classList.add('active', 'bg-indigo-700', 'text-white');
-            clickedButton.classList.remove('text-indigo-700', 'hover:bg-indigo-100');
-            const targetCourse = clickedButton.getAttribute('data-course');
-            document.getElementById(`content-${targetCourse.replace(/\s/g, '-')}`).classList.remove('hidden');
-
-            // Re-adjuntar listeners de acordeón para la pestaña activa
-            attachAccordionListeners();
-        });
-
-        // Lógica para el acordeón (expandir/colapsar grupos)
+        // Function to attach accordion listeners
         function attachAccordionListeners() {
             document.querySelectorAll('.accordion-header').forEach(header => {
+                // Remove any existing click listeners to prevent duplicates
+                header.onclick = null;
                 header.onclick = function() {
                     const content = this.nextElementSibling;
                     const icon = this.querySelector('svg');
@@ -455,13 +422,293 @@
             });
         }
 
-        // Llamar a la función para adjuntar listeners cuando la página carga
-        document.addEventListener('DOMContentLoaded', attachAccordionListeners);
+        // Main tab switching logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtonsContainer = document.getElementById('main-tab-buttons');
+            const tabContentContainer = document.getElementById('main-tab-content');
 
-        // Activar la primera pestaña al cargar la página
-        if (tabButtonsContainer.firstElementChild) {
-            tabButtonsContainer.firstElementChild.click();
-        }
+            // Initial setup for student distribution tabs
+            const studentTabButtonsContainer = document.getElementById('student-tab-buttons');
+            const studentTabContentContainer = document.getElementById('student-tab-content');
+            let firstCourse = true;
+
+            for (const courseName in coursesData) {
+                // Create tab button for student distribution
+                const button = document.createElement('button');
+                button.className = `tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 ${firstCourse ? 'active bg-indigo-700 text-white' : 'text-indigo-700 hover:bg-indigo-100'}`;
+                button.textContent = courseName;
+                button.setAttribute('data-course', courseName);
+                studentTabButtonsContainer.appendChild(button);
+
+                // Create tab content for student distribution
+                const contentDiv = document.createElement('div');
+                contentDiv.id = `student-content-${courseName.replace(/\s/g, '-')}`;
+                contentDiv.className = `tab-pane ${firstCourse ? 'block' : 'hidden'}`;
+                contentDiv.innerHTML = renderCourseGroups(courseName, coursesData[courseName]);
+                studentTabContentContainer.appendChild(contentDiv);
+
+                firstCourse = false;
+            }
+
+            // Event listener for main tabs (Cronograma and Distribución)
+            tabButtonsContainer.addEventListener('click', (event) => {
+                const clickedButton = event.target.closest('.main-tab-button');
+                if (!clickedButton) return;
+
+                // Remove 'active' class from all main buttons and hide all main contents
+                document.querySelectorAll('.main-tab-button').forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-700', 'text-white');
+                    btn.classList.add('text-indigo-700', 'hover:bg-indigo-100');
+                });
+                document.querySelectorAll('.main-tab-pane').forEach(pane => pane.classList.add('hidden'));
+
+                // Add 'active' class to the clicked main button and show its content
+                clickedButton.classList.add('active', 'bg-indigo-700', 'text-white');
+                clickedButton.classList.remove('text-indigo-700', 'hover:bg-indigo-100');
+                const targetTab = clickedButton.getAttribute('data-tab');
+                document.getElementById(targetTab).classList.remove('hidden');
+
+                // If the "Distribución de Estudiantes" tab is active, activate its first course tab and attach accordion listeners
+                if (targetTab === 'student-distribution-tab') {
+                    if (studentTabButtonsContainer.firstElementChild) {
+                        studentTabButtonsContainer.firstElementChild.click(); // This will also call attachAccordionListeners
+                    }
+                }
+            });
+
+            // Event listener for student distribution sub-tabs
+            studentTabButtonsContainer.addEventListener('click', (event) => {
+                const clickedButton = event.target.closest('.tab-button');
+                if (!clickedButton) return;
+
+                // Remove 'active' class from all student sub-tab buttons and hide all student sub-tab contents
+                document.querySelectorAll('#student-tab-buttons .tab-button').forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-700', 'text-white');
+                    btn.classList.add('text-indigo-700', 'hover:bg-indigo-100');
+                });
+                document.querySelectorAll('#student-tab-content .tab-pane').forEach(pane => pane.classList.add('hidden'));
+
+                // Add 'active' class to the clicked student sub-tab button and show its content
+                clickedButton.classList.add('active', 'bg-indigo-700', 'text-white');
+                clickedButton.classList.remove('text-indigo-700', 'hover:bg-indigo-100');
+                const targetCourse = clickedButton.getAttribute('data-course');
+                document.getElementById(`student-content-${targetCourse.replace(/\s/g, '-')}`).classList.remove('hidden');
+
+                // Re-attach accordion listeners for the active student tab
+                attachAccordionListeners();
+            });
+
+            // Activate the first main tab (Cronograma) on page load
+            if (tabButtonsContainer.firstElementChild) {
+                tabButtonsContainer.firstElementChild.click();
+            }
+        });
     </script>
+</head>
+<body class="bg-gray-50 text-gray-800 p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-6 sm:p-8 md:p-10">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-indigo-700 mb-2">Gestión de Cronogramas y Estudiantes</h1>
+        <h2 class="text-xl sm:text-2xl text-center text-gray-600 mb-8">Organiza tus horarios y grupos de manera eficiente</h2>
+
+        <!-- Main Tab Buttons -->
+        <div id="main-tab-buttons" class="flex flex-wrap justify-center mb-6 border-b-2 border-indigo-200">
+            <button class="main-tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 active bg-indigo-700 text-white" data-tab="cronograma-tab">
+                Cronograma DIA
+            </button>
+            <button class="main-tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 text-indigo-700 hover:bg-indigo-100" data-tab="student-distribution-tab">
+                Distribución de Estudiantes
+            </button>
+        </div>
+
+        <!-- Main Tab Content -->
+        <div id="main-tab-content">
+            <!-- Cronograma DIA Tab Content -->
+            <div id="cronograma-tab" class="main-tab-pane block">
+                <h2 class="text-xl sm:text-2xl text-center text-gray-600 mb-8">Periodo: Martes 29 de julio al Miércoles 13 de agosto de 2025</h2>
+
+                <!-- Filter Section -->
+                <div class="filtros flex flex-wrap justify-center items-center gap-4 mb-8 p-4 bg-indigo-50 rounded-lg shadow-md">
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <label for="tipoFiltro" class="font-semibold text-indigo-700">Filtrar por tipo de evaluación:</label>
+                        <select id="tipoFiltro" onchange="filtrarTabla()"
+                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                            <option value="todos">Todos</option>
+                            <option value="lectura">Lectura</option>
+                            <option value="matemática">Matemática</option>
+                            <option value="socioem">Socioemocional</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <label for="cursoFiltro" class="font-semibold text-indigo-700">Filtrar por curso:</label>
+                        <select id="cursoFiltro" onchange="filtrarTabla()"
+                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                            <option value="todos">Todos</option>
+                            <option value="2°a">2°A</option>
+                            <option value="3°a">3°A</option>
+                            <option value="4°a">4°A</option>
+                            <option value="5°a">5°A</option>
+                            <option value="6°a">6°A</option>
+                            <option value="7°a">7°A</option>
+                            <option value="8°a">8°A</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <label for="diaFiltro" class="font-semibold text-indigo-700">Filtrar por día/semana:</label>
+                        <select id="diaFiltro" onchange="filtrarTabla()"
+                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                            <option value="todos">Todos</option>
+                            <option value="lunes">Lunes</option>
+                            <option value="martes">Martes</option>
+                            <option value="miércoles">Miércoles</option>
+                            <option value="jueves">Jueves</option>
+                            <option value="viernes">Viernes</option>
+                            <option value="semana 1">Semana 1</option>
+                            <option value="semana 2">Semana 2</option>
+                            <option value="semana 3">Semana 3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl sm:text-3xl font-semibold text-center text-indigo-700 mb-6">Gráfico de Gantt</h2>
+
+                <!-- Table Section -->
+                <div class="overflow-x-auto rounded-lg shadow-xl">
+                    <table id="tablaCronograma" class="min-w-full divide-y divide-indigo-200">
+                        <thead class="bg-indigo-600">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider rounded-tl-lg">Semana/Día</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B1</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B2</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B3 (45min)</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider rounded-tr-lg">B4 (45min)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Table Rows -->
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Martes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G1 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G2 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Miércoles</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Jueves</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Matemática</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Viernes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Matemática</td>
+                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">4°A G3 Socioem.</td>
+                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">5°A G1 Socioem.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Lunes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G2 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G1 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G2 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Martes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G2 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G3 Matemática</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Miércoles</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G2 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G3 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G1 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Jueves</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G2 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G1 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G2 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Viernes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G1 Matemática</td>
+                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">7°A G2 Socioem.</td>
+                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">7°A G3 Socioem.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Lunes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G2 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G3 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G1 Socioem.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Martes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G2 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G3 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Socioem.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Miércoles</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G3 Socioem.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Legend Section -->
+                <div class="leyenda mt-8 p-6 bg-gray-100 rounded-xl shadow-md text-gray-700">
+                    <strong class="text-lg font-semibold text-indigo-700">Leyenda:</strong>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li>
+                            <span class="inline-block w-6 h-4 bg-green-100 rounded-sm mr-2 align-middle"></span>
+                            <span class="align-middle">Bloque largo (90 minutos)</span>
+                        </li>
+                        <li>
+                            <span class="inline-block w-6 h-4 bg-yellow-100 rounded-sm mr-2 align-middle"></span>
+                            <span class="align-middle">Bloque corto (45 minutos, solo viernes)</span>
+                        </li>
+                        <li class="mt-4 text-sm text-gray-600">Utiliza los filtros para ver el cronograma por tipo de evaluación, curso y día o semana.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Student Distribution Tab Content -->
+            <div id="student-distribution-tab" class="main-tab-pane hidden">
+                <h2 class="text-2xl sm:text-3xl font-semibold text-center text-indigo-700 mb-6">Organizador de Grupos por Curso</h2>
+
+                <!-- Tab buttons for courses (student distribution) -->
+                <div id="student-tab-buttons" class="flex flex-wrap justify-center mb-6 border-b-2 border-indigo-200">
+                    <!-- Tab buttons for courses will be generated here by JavaScript -->
+                </div>
+
+                <!-- Container for tab content (student groups) -->
+                <div id="student-tab-content">
+                    <!-- Tab content (student groups) will be generated here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
