@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma DIA y Distribución de Estudiantes</title>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general body defaults */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Ensure select boxes have consistent styling */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5rem 1.5rem;
+            padding-right: 2.5rem; /* Space for the custom arrow */
+        }
+        /* Accordion specific styles */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        }
+        .accordion-content.active {
+            max-height: 1000px; /* Sufficiently large to contain the content */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+    </style>
+    <script>
+        // Data for student distribution by course
+        const coursesData = {
+            "2º básico A": [
+                {"N/L": "1", "RUN": "26125945-1", "Nombre": "ACEVEDO MATAMALA JOSEFA ISIDORA", "Observaciones": ""},
+                {"N/L": "2", "RUN": "100638001-4", "Nombre": "ALVAREZ GONZALEZ SANTIAGO ANDRES", "Observaciones": ""},
+                {"N/L": "3", "RUN": "26076627-9", "Nombre": "AREVALO MALAVE CRISTOBAL MIGUEL", "Observaciones": ""},
+                {"N/L": "4", "RUN": "100648848-6", "Nombre": "ASCANIO ANGULO FABIAN NAHEL", "Observaciones": ""},
+                {"N/L": "5", "RUN": "26093290-K", "Nombre": "BELLO ALVARADO FABRICIO AΝΤΟΝΙΟ", "Observaciones": ""},
+                {"N/L": "6", "RUN": "26472939-4", "Nombre": "BERMUDEZ LINARES HANNA ISABELLA", "Observaciones": ""},
+                {"N/L": "7", "RUN": "26029989-1", "Nombre": "BUSTAMANTE MANZANO DAVID MATEO", "Observaciones": ""},
+                {"N/L": "8", "RUN": "25943576-5", "Nombre": "CERDA MORAGA DANIELA TRINIDAD", "Observaciones": ""},
+                {"N/L": "9", "RUN": "26122550-6", "Nombre": "CORONEL TORRES JOHN TAYLOR", "Observaciones": ""},
+                {"N/L": "10", "RUN": "25950642-5", "Nombre": "DE CARA SANTOS VALENTINA GRACIA", "Observaciones": ""},
+                {"N/L": "11", "RUN": "100694287-K", "Nombre": "DIAZ NAVA DIEGO ALEJANDRO", "Observaciones": ""},
+                {"N/L": "12", "RUN": "25919044-4", "Nombre": "GARCIA PERDOMO ALANA ISABEL", "Observaciones": ""},
+                {"N/L": "13", "RUN": "100558332-9", "Nombre": "LIZARDO ARTEAGA SALVADOR ALFONSO", "Observaciones": ""},
+                {"N/L": "14", "RUN": "27851154-5", "Nombre": "MARIÑO ROJAS SAMUEL JOSUE", "Observaciones": ""},
+                {"N/L": "15", "RUN": "25887091-3", "Nombre": "MARTINEZ RAMIREZ CATALINA IGNACIA", "Observaciones": ""},
+                {"N/L": "16", "RUN": "26510879-2", "Nombre": "MORA QUINTERO SAMANTHA LAIRETH", "Observaciones": ""},
+                {"N/L": "17", "RUN": "26103450-6", "Nombre": "MORALES BERNAL ALONSO LEON", "Observaciones": ""},
+                {"N/L": "18", "RUN": "28056057-K", "Nombre": "MORILLO CAMACHO ARIADNA VICTORIA", "Observaciones": ""},
+                {"N/L": "19", "RUN": "100726759-9", "Nombre": "NUÑEZ MERINO THIAGO MATIAS", "Observaciones": ""},
+                {"N/L": "20", "RUN": "100539526-3", "Nombre": "PACHECO RIOS JULIAN", "Observaciones": ""},
+                {"N/L": "21", "RUN": "26143843-7", "Nombre": "RAIN TREUQUIL ANTÜAM TRAYTRAYKO", "Observaciones": ""},
+                {"N/L": "22", "RUN": "26329961-2", "Nombre": "RAMIREZ HERNANDEZ ESMERALDA LISSETH", "Observaciones": ""},
+                {"N/L": "23", "RUN": "25786214-3", "Nombre": "RODRIGUEZ CACHIQUE SCARLETT ALEXANDRA CRISTEL", "Observaciones": ""},
+                {"N/L": "24", "RUN": "27125192-0", "Nombre": "RODRIGUEZ FLORES FRANCISCO JAVIER", "Observaciones": ""},
+                {"N/L": "25", "RUN": "100722068-1", "Nombre": "ROMERO MARCELLA JESUS ANTONIO", "Observaciones": ""},
+                {"N/L": "26", "RUN": "27227014-7", "Nombre": "SALAZAR COY THIAGO ANDRES", "Observaciones": ""},
+                {"N/L": "27", "RUN": "100671108-8", "Nombre": "SANGRONIS BRICEÑO THIAGO ANDRES", "Observaciones": ""},
+                {"N/L": "28", "RUN": "100564667-3", "Nombre": "SIVIRA REBOLLEDO ETHAN GABRIEL", "Observaciones": ""},
+                {"N/L": "29", "RUN": "25792304-5", "Nombre": "SORENSEN ERAZO LUCIANA", "Observaciones": ""},
+                {"N/L": "30", "RUN": "27899196-2", "Nombre": "SOSA URDANETA ANTHONELA AILEMA", "Observaciones": ""},
+                {"N/L": "31", "RUN": "25992097-3", "Nombre": "URIBE RAMIREZ GINO MARIANO", "Observaciones": ""},
+                {"N/L": "32", "RUN": "100692592-4", "Nombre": "VILLALBA GONZALEZ LUIS FERNANDO", "Observaciones": ""},
+                {"N/L": "33", "RUN": "25906579-8", "Nombre": "SAAVEDRA MUTIS GAEL", "Observaciones": ""},
+                {"N/L": "34", "RUN": "26117779-K", "Nombre": "LANDERO TORO GAEL ANKU IGNACIO", "Observaciones": ""},
+                {"N/L": "35", "RUN": "25718857-4", "Nombre": "SOTO VERGARA MAYCKOL ESTEBAN", "Observaciones": ""},
+                {"N/L": "36", "RUN": "25989689-4", "Nombre": "MARCHANT MARABOLI JULIETA IGNACIA", "Observaciones": "RET. 08/04/2025"},
+                {"N/L": "37", "RUN": "100823374-4", "Nombre": "ROBLES GRAJALES JOSHUA MATEO", "Observaciones": ""},
+                {"N/L": "38", "RUN": "100818279-1", "Nombre": "VILLAMIZAR ACOSTA CAMILA VALENTINA", "Observaciones": ""},
+                {"N/L": "39", "RUN": "25429710-0", "Nombre": "MORAN ARANCIBIA MILAN DEL PIERO", "Observaciones": ""},
+            ],
+            "3º básico A": [
+                {"N/L": "1", "RUN": "27809905-9", "Nombre": "AGRINZONES MILLARES SAMUEL ABRAHAM", "Observaciones": ""},
+                {"N/L": "2", "RUN": "25661382-4", "Nombre": "AGUILAR GAVIDIA ANASTASIA", "Observaciones": ""},
+                {"N/L": "3", "RUN": "27276331-3", "Nombre": "ALFARO FARIAS SAMUEL OCTAVIO", "Observaciones": ""},
+                {"N/L": "4", "RUN": "25590662-3", "Nombre": "ALVAREZ GONZALEZ BENJAMIN ANDRES", "Observaciones": ""},
+                {"N/L": "5", "RUN": "26476940-K", "Nombre": "ARAUJO ZAPATA BARBARA FRANCIEL", "Observaciones": ""},
+                {"N/L": "6", "RUN": "25550204-2", "Nombre": "ARAYA URBINA CAMILA IGNACIA", "Observaciones": ""},
+                {"N/L": "7", "RUN": "25455688-2", "Nombre": "ARAYA URRUTIA AMARU BENJAMIN", "Observaciones": ""},
+                {"N/L": "8", "RUN": "26834868-9", "Nombre": "ARRIETA PEÑALOZA FRENCY ANDRES", "Observaciones": ""},
+                {"N/L": "9", "RUN": "27734632-K", "Nombre": "ATENCIO ANDRADE VIANCA ESTHELA", "Observaciones": ""},
+                {"N/L": "10", "RUN": "100636899-5", "Nombre": "BESCANZA MUJICA ABRAHAM ALEXIS", "Observaciones": ""},
+                {"N/L": "11", "RUN": "26579764-4", "Nombre": "CARPIO ROJAS VALERIE ISABELLA", "Observaciones": ""},
+                {"N/L": "12", "RUN": "25425467-3", "Nombre": "FLORES FLORES TOMAS EMILIANO", "Observaciones": ""},
+                {"N/L": "13", "RUN": "25631038-4", "Nombre": "GALLARDO RIQUELME TRINIDAD ENEDINA DEL CARMEN", "Observaciones": ""},
+                {"N/L": "14", "RUN": "25522870-6", "Nombre": "GARCÍA ULLOA AGUSTÍN IGNACIO", "Observaciones": "RET. 26/05/2025"},
+                {"N/L": "15", "RUN": "26862845-2", "Nombre": "GIMENEZ BRAZAO FABRICIO ANSELMO", "Observaciones": ""},
+                {"N/L": "16", "RUN": "100514512-7", "Nombre": "GODOY MONTERO ADRIANY LUISANA", "Observaciones": ""},
+                {"N/L": "17", "RUN": "25668307-5", "Nombre": "GUEVARA GONZALEZ SARA ISABELLA", "Observaciones": ""},
+                {"N/L": "18", "RUN": "100587249-5", "Nombre": "GUZMAN GARCIA ISABELLA CRISTINA", "Observaciones": ""},
+                {"N/L": "19", "RUN": "25406770-9", "Nombre": "MARTINEZ BETANCOURT NICOLAS ALONSO", "Observaciones": ""},
+                {"N/L": "20", "RUN": "100648598-3", "Nombre": "MOJICA CAICEDO VALERIN SOFIA", "Observaciones": "RET. 17/07/2025"},
+                {"N/L": "21", "RUN": "25652863-0", "Nombre": "MORALES BRICEÑO WILLIAM NICOLAS", "Observaciones": ""},
+                {"N/L": "22", "RUN": "25474790-4", "Nombre": "NAVARRO BRAVO OSCAR VLADIMIR", "Observaciones": ""},
+                {"N/L": "23", "RUN": "25355674-9", "Nombre": "OCARES GÓMEZ CAROLINA ESTEFANIA", "Observaciones": ""},
+                {"N/L": "24", "RUN": "27027923-6", "Nombre": "RAMIREZ CASTRO DIEGO ESTEBAN", "Observaciones": ""},
+                {"N/L": "25", "RUN": "27758146-9", "Nombre": "RAUSEO GUARIMAN ANGEL LEANDRO", "Observaciones": ""},
+                {"N/L": "26", "RUN": "100552629-5", "Nombre": "RIVERA GARCIA LUCIANO ANDRES", "Observaciones": ""},
+                {"N/L": "27", "RUN": "100505953-0", "Nombre": "ROMERO GIL HASSAM CALEB", "Observaciones": ""},
+                {"N/L": "28", "RUN": "25654060-6", "Nombre": "SAN MARTIN AVILA ANTONELLA ISIDORA", "Observaciones": ""},
+                {"N/L": "29", "RUN": "25438315-5", "Nombre": "SIESQUEN ARMAS LIA GENESIS", "Observaciones": ""},
+                {"N/L": "30", "RUN": "25604308-4", "Nombre": "SORIA TOBAR MIA VALENTINA", "Observaciones": ""},
+                {"N/L": "31", "RUN": "100504373-1", "Nombre": "TABARE ESPAÑA SARA VIRGINIA", "Observaciones": ""},
+                {"N/L": "32", "RUN": "25475659-8", "Nombre": "TORRES ALARCÓN AMELIA PASCUALA", "Observaciones": ""},
+                {"N/L": "33", "RUN": "25531065-8", "Nombre": "VALDENEGRO ARIAS MAITE MONSERRAT", "Observaciones": ""},
+                {"N/L": "34", "RUN": "27209359-8", "Nombre": "VALERO VIVAS DANNA ISABELLA", "Observaciones": ""},
+                {"N/L": "35", "RUN": "26124425-K", "Nombre": "VASQUEZ CERNA LUKA KENNEΤΗ", "Observaciones": ""},
+                {"N/L": "36", "RUN": "28380235-3", "Nombre": "PAZ VILCHEZ VICTORIA VALENTINA", "Observaciones": ""},
+                {"N/L": "37", "RUN": "26426187-2", "Nombre": "RAMIREZ PEROZO LUCIA VICTORIA", "Observaciones": ""},
+                {"N/L": "38", "RUN": "26022680-0", "Nombre": "URBANO JUAN ESTEBAN", "Observaciones": ""},
+                {"N/L": "39", "RUN": "100777737-6", "Nombre": "CUBILLAN AROCHA JESUS REINALDO", "Observaciones": ""},
+            ],
+            "4º básico A": [
+                {"N/L": "1", "RUN": "25281733-6", "Nombre": "ALQUINTA LEAL COLOMBA AURORA", "Observaciones": ""},
+                {"N/L": "2", "RUN": "100791593-0", "Nombre": "ARANGUREN GUDIÑO LUISCIANYELIS SOFIA", "Observaciones": ""},
+                {"N/L": "3", "RUN": "27624591-0", "Nombre": "ARISMENDI LOZADA PEDRO PABLO", "Observaciones": ""},
+                {"N/L": "4", "RUN": "25234010-6", "Nombre": "BENITES ROJAS CAMILA ITZAYANA VALERIA", "Observaciones": ""},
+                {"N/L": "5", "RUN": "24933616-5", "Nombre": "CABRERA MIRANDA ANTHONY GERALD", "Observaciones": ""},
+                {"N/L": "6", "RUN": "24996449-2", "Nombre": "CERDA MORAGA AYLIN CAMILA", "Observaciones": ""},
+                {"N/L": "7", "RUN": "24447606-6", "Nombre": "CHAVEZ QUISPE MATIAS SAMIN", "Observaciones": ""},
+                {"N/L": "8", "RUN": "25274178-K", "Nombre": "DIAZ ORELLANA ORION JESÚS", "Observaciones": ""},
+                {"N/L": "9", "RUN": "26033404-2", "Nombre": "DUDAMEL LOZADA EVA ANTONELLA", "Observaciones": ""},
+                {"N/L": "10", "RUN": "28139775-3", "Nombre": "ESCOBAR GONZALES AMΑΙΑ", "Observaciones": ""},
+                {"N/L": "11", "RUN": "25092112-8", "Nombre": "FARIAS HUARCAYA HENIZ KENDRINCK", "Observaciones": ""},
+                {"N/L": "12", "RUN": "26712001-3", "Nombre": "FIGUEROA BRAVO ANTONELLA HANOI", "Observaciones": ""},
+                {"N/L": "13", "RUN": "25841235-4", "Nombre": "FULDA FELIBERT NICOLE VALENTINA", "Observaciones": ""},
+                {"N/L": "14", "RUN": "25025986-7", "Nombre": "JEREZ CAMPOS EMILIA PAZ", "Observaciones": ""},
+                {"N/L": "15", "RUN": "26383048-2", "Nombre": "LOVERA CLAVIJO MARCELA SOFIA", "Observaciones": ""},
+                {"N/L": "16", "RUN": "27146146-1", "Nombre": "MARIN ARCILA DIEGO ANDRE", "Observaciones": ""},
+                {"N/L": "17", "RUN": "26733819-1", "Nombre": "MARQUEZ RAMIREZ HILLARY ISABELLE", "Observaciones": ""},
+                {"N/L": "18", "RUN": "25227678-5", "Nombre": "MONTENEGRO SALDAÑA GABRIEL OMAR", "Observaciones": ""},
+                {"N/L": "19", "RUN": "24782799-4", "Nombre": "MONTENEGRO SALDAÑA RAFAEL EMILIO", "Observaciones": ""},
+                {"N/L": "20", "RUN": "24987961-4", "Nombre": "MORALES BERNAL RODRIGO HUMBERTO", "Observaciones": ""},
+                {"N/L": "21", "RUN": "26743827-7", "Nombre": "NUÑEZ MALAVE SAUL ISAIAS", "Observaciones": ""},
+                {"N/L": "22", "RUN": "26616085-2", "Nombre": "ORELLANA FERNANDEZ ARANTXA SOFIA", "Observaciones": ""},
+                {"N/L": "23", "RUN": "27459130-7", "Nombre": "PAZO ENTRENA PAULA CRISTINA", "Observaciones": ""},
+                {"N/L": "24", "RUN": "100559917-9", "Nombre": "PERAZA FLORES ABDEL FRANCISCO", "Observaciones": "RET. 19/03/2025"},
+                {"N/L": "25", "RUN": "26528796-4", "Nombre": "POBLETE MERINO FRANCO ALEXANDER", "Observaciones": ""},
+                {"N/L": "26", "RUN": "25322374-K", "Nombre": "RAMOS SOTO CRISTÓBAL MARTİN", "Observaciones": ""},
+                {"N/L": "27", "RUN": "24974892-7", "Nombre": "SANCHEZ VĒLIZ BELÉN IGNACIA", "Observaciones": ""},
+                {"N/L": "28", "RUN": "27941573-6", "Nombre": "SANDOVAL SALAZAR GEFFERSON ABDIEL", "Observaciones": ""},
+                {"N/L": "29", "RUN": "27242133-1", "Nombre": "SOLORZANO LINARES MATTHEW ALESSANDRO", "Observaciones": ""},
+                {"N/L": "30", "RUN": "25219448-7", "Nombre": "VASQUEZ ÁVILA ALFONSINA SAYEN", "Observaciones": ""},
+                {"N/L": "31", "RUN": "26743499-9", "Nombre": "VELASQUEZ RODRIGUEZ SALOME AINHOA", "Observaciones": ""},
+                {"N/L": "32", "RUN": "25822281-4", "Nombre": "VELASQUEZ VELASQUEZ FABIANNA VICTORIA", "Observaciones": ""},
+                {"N/L": "33", "RUN": "25108396-7", "Nombre": "VERGARA BARROS AMANDA ISIDORA", "Observaciones": ""},
+                {"N/L": "34", "RUN": "27222944-9", "Nombre": "VILLEGAS FUENTES SOFIA VALERIA", "Observaciones": ""},
+                {"N/L": "35", "RUN": "27440815-4", "Nombre": "VIZCAYA CASTILLO VINCENT YAEL LEVI", "Observaciones": ""},
+                {"N/L": "36", "RUN": "27878482-7", "Nombre": "ZAMORA VILLAMIZAR ISABELLA SOFIA", "Observaciones": ""},
+                {"N/L": "37", "RUN": "28284774-4", "Nombre": "MARTINEZ SOTO MARCO ANΝΤΟΝΙΟ", "Observaciones": ""},
+                {"N/L": "38", "RUN": "25244751-2", "Nombre": "PLAZA VERA AMELIA", "Observaciones": "RET. 24/04/2025"},
+                {"N/L": "39", "RUN": "26834832-8", "Nombre": "ARRIETA PEÑALOZA CLAUDIA VIRGINIA", "Observaciones": ""},
+                {"N/L": "40", "RUN": "26946316-3", "Nombre": "TOVAR SANTANA DIEGO ARMANDO", "Observaciones": ""},
+            ],
+            "5° básico A": [
+                {"N/L": "1", "RUN": "24619093-3", "Nombre": "ARAYA URRUTIA PASCALE ANTONELLA", "Observaciones": ""},
+                {"N/L": "2", "RUN": "27734606-0", "Nombre": "ATENCIO ANDRADE ALFONSO DAVID", "Observaciones": ""},
+                {"N/L": "3", "RUN": "24797614-0", "Nombre": "BAEZ PIERATTINI MELANIE JULIETT", "Observaciones": ""},
+                {"N/L": "4", "RUN": "26560247-9", "Nombre": "BARON PALACIOS PAULA ALEJANDRA", "Observaciones": "RET. 24/03/2025"},
+                {"N/L": "5", "RUN": "24122657-3", "Nombre": "BUSTAMANTE MANZANO JUAN PABLO", "Observaciones": ""},
+                {"N/L": "6", "RUN": "24792337-3", "Nombre": "CACERES AHUMADA SANTIAGO VALENTIN", "Observaciones": "RET. 07/07/2025"},
+                {"N/L": "7", "RUN": "24395636-6", "Nombre": "CAMUS URBINA PATRICIO ANDRES", "Observaciones": ""},
+                {"N/L": "8", "RUN": "100460169-2", "Nombre": "CARDONA FLORES ISABELLA DEL CARMEN", "Observaciones": ""},
+                {"N/L": "9", "RUN": "28224948-0", "Nombre": "DIAZ ACOSTA ROSMARY ALEXANDRA", "Observaciones": ""},
+                {"N/L": "10", "RUN": "100469262-0", "Nombre": "EVERON RIVERA DIEGO MANUEL", "Observaciones": ""},
+                {"N/L": "11", "RUN": "24858986-8", "Nombre": "FULLER SUEGART ARANTZA VICTORIA", "Observaciones": ""},
+                {"N/L": "12", "RUN": "24900400-6", "Nombre": "GARAY SANCHEZ RODRIGO AUCAN", "Observaciones": ""},
+                {"N/L": "13", "RUN": "28247687-8", "Nombre": "GARCIA GALANTON PEDRO PABLO", "Observaciones": ""},
+                {"N/L": "14", "RUN": "26376664-4", "Nombre": "GIL ARAUJO SANTIAGO PAUL", "Observaciones": ""},
+                {"N/L": "15", "RUN": "24918143-9", "Nombre": "GONZALEZ FUENTEALBA FRANCO AGUSTIN", "Observaciones": ""},
+                {"N/L": "16", "RUN": "24942197-9", "Nombre": "GONZÁLEZ SEPÜLVEDA EMILIANO ANDRÉS", "Observaciones": ""},
+                {"N/L": "17", "RUN": "24499830-5", "Nombre": "GUELET TRAPEN RENATO AGUSTIN", "Observaciones": ""},
+                {"N/L": "18", "RUN": "25997630-8", "Nombre": "LACOSTE FERNANDEZ PAULA FERNANDA", "Observaciones": ""},
+                {"N/L": "19", "RUN": "24812471-7", "Nombre": "LANDAETA DURAN ANAIS MILLARAY", "Observaciones": ""},
+                {"N/L": "20", "RUN": "26212083-K", "Nombre": "LOPEZ UGARTE VALERIA SOFIA", "Observaciones": ""},
+                {"N/L": "21", "RUN": "24886422-2", "Nombre": "MARTINEZ RAMIREZ ANTONELLA POLET", "Observaciones": ""},
+                {"N/L": "22", "RUN": "24778779-8", "Nombre": "MELLADO SEVERINO CRISTOBAL", "Observaciones": ""},
+                {"N/L": "23", "RUN": "24778761-5", "Nombre": "MELLADO SEVERINO EMILIA", "Observaciones": ""},
+                {"N/L": "24", "RUN": "24852580-0", "Nombre": "MIRANDA LECAROS PÍA CATALINA", "Observaciones": ""},
+                {"N/L": "25", "RUN": "100516863-1", "Nombre": "MONTILLA MONTES VICTORIA ANABEL", "Observaciones": ""},
+                {"N/L": "26", "RUN": "27776138-6", "Nombre": "NORIEGA RODRIGUEZ JUAN SIMON", "Observaciones": ""},
+                {"N/L": "27", "RUN": "24669893-7", "Nombre": "PRETER RAMOS JEREMIAS ALFREDO", "Observaciones": ""},
+                {"N/L": "28", "RUN": "24597279-2", "Nombre": "REYES NARANJO MARIANO ADAHIR", "Observaciones": ""},
+                {"N/L": "29", "RUN": "26657715-K", "Nombre": "RODRIGUEZ MENDEZ NICOLE ISABEL", "Observaciones": ""},
+                {"N/L": "30", "RUN": "27029711-0", "Nombre": "RODRIGUEZ PERDOMO KATHERINE ADRIANA", "Observaciones": ""},
+                {"N/L": "31", "RUN": "25904486-3", "Nombre": "ROJAS ARAUZ ALEXA", "Observaciones": ""},
+                {"N/L": "32", "RUN": "24703679-2", "Nombre": "ROJAS HERNANDEZ CRISTHOFER ANTONIO", "Observaciones": ""},
+                {"N/L": "33", "RUN": "24689845-6", "Nombre": "ROJAS NARANJO GABRIEL ESTEBAN", "Observaciones": ""},
+                {"N/L": "34", "RUN": "24689817-0", "Nombre": "ROJAS NARANJO GUSTAVO ALEXIS", "Observaciones": ""},
+                {"N/L": "35", "RUN": "24919149-3", "Nombre": "VARGAS GARRIDO MATEO AMARU", "Observaciones": ""},
+                {"N/L": "36", "RUN": "28196348-1", "Nombre": "VASQUEZ SALAZAR XOANA KRISTELL", "Observaciones": ""},
+                {"N/L": "37", "RUN": "26539372-1", "Nombre": "VERA LEON ANDREA LUCIA", "Observaciones": ""},
+                {"N/L": "38", "RUN": "24596636-9", "Nombre": "VERGARA BARROS EMILIA AΝΤΟΝΙΑ", "Observaciones": ""},
+                {"N/L": "39", "RUN": "28204137-5", "Nombre": "ROJAS MARTINEZ MARIA CHIQUINQUIRA DEL VALLE", "Observaciones": ""},
+                {"N/L": "40", "RUN": "24468716-4", "Nombre": "PAIS CAMPOS ISAIAS EMILIANO", "Observaciones": ""},
+            ],
+            "6º básico A": [
+                {"N/L": "1", "RUN": "24264124-8", "Nombre": "AEDO CONCHA ANDRES NICOLAS", "Observaciones": ""},
+                {"N/L": "2", "RUN": "24446941-8", "Nombre": "ALBORNOZ ZAPATA NICOLÁS ISAY ANDRES", "Observaciones": ""},
+                {"N/L": "3", "RUN": "24309554-9", "Nombre": "ALLENDE GOMEZ MIGUEL ANGEL", "Observaciones": ""},
+                {"N/L": "4", "RUN": "25934968-0", "Nombre": "AREVALO MALAVE EDUARDO SAID", "Observaciones": ""},
+                {"N/L": "5", "RUN": "26661534-5", "Nombre": "ARRIETA JIMENEZ MELISSA VALENTINA", "Observaciones": ""},
+                {"N/L": "6", "RUN": "25781913-2", "Nombre": "CAMACHO MEJIAS LUIS ENRIQUE", "Observaciones": ""},
+                {"N/L": "7", "RUN": "100617967-K", "Nombre": "CAMACHO PRIETO KARLA VICTORIA", "Observaciones": ""},
+                {"N/L": "8", "RUN": "100617965-3", "Nombre": "CAMACHO PRIETO KENDRA VALENTINA", "Observaciones": ""},
+                {"N/L": "9", "RUN": "24597544-9", "Nombre": "CASTILLO PIZARRO MAURA ISABEL", "Observaciones": ""},
+                {"N/L": "10", "RUN": "26026751-5", "Nombre": "CONCHA PEÑALOZA SAVID ALESSANDRO", "Observaciones": ""},
+                {"N/L": "11", "RUN": "26334125-2", "Nombre": "FERRER GARCIA SEBASTIAN MANUEL", "Observaciones": ""},
+                {"N/L": "12", "RUN": "24395539-4", "Nombre": "FUENTEALBA AVENDAÑO JACOB ALEXANDER", "Observaciones": ""},
+                {"N/L": "13", "RUN": "24409721-9", "Nombre": "GODOY FUENTEALBA LIAM AMARO", "Observaciones": ""},
+                {"N/L": "14", "RUN": "100519234-6", "Nombre": "GONZALEZ CASTRO SOPHIA DE LOS ANGELES", "Observaciones": ""},
+                {"N/L": "15", "RUN": "24446621-4", "Nombre": "GONZÁLEZ SEPULVEDA MATEO IGNACIO", "Observaciones": ""},
+                {"N/L": "16", "RUN": "25686923-3", "Nombre": "GUERRA RIOS ANASTASIA ISABELLA", "Observaciones": ""},
+                {"N/L": "17", "RUN": "26732268-6", "Nombre": "HERNANDEZ FARIÑES YVANNA DANIELA", "Observaciones": ""},
+                {"N/L": "18", "RUN": "24515898-K", "Nombre": "HIDALGO MUÑOZ ELENA KUMIKO", "Observaciones": ""},
+                {"N/L": "19", "RUN": "26013279-2", "Nombre": "MARIN TRAISH RODRIGO NAIM", "Observaciones": ""},
+                {"N/L": "20", "RUN": "100663938-7", "Nombre": "MARQUEZ BEDOYA JHEYNER GABRIEL", "Observaciones": ""},
+                {"N/L": "21", "RUN": "26799477-3", "Nombre": "MEZQUITA BAEZ WARLENNY MANUELA", "Observaciones": ""},
+                {"N/L": "22", "RUN": "26587855-5", "Nombre": "MONTES ASTUDILLO WALESKA ALEXANDRA", "Observaciones": ""},
+                {"N/L": "23", "RUN": "100737714-9", "Nombre": "MORA FUENTES JONKA JOSE", "Observaciones": ""},
+                {"N/L": "24", "RUN": "24329236-0", "Nombre": "MORENO GONZÁLEZ ERIC EDUARDO", "Observaciones": ""},
+                {"N/L": "25", "RUN": "25966620-1", "Nombre": "NEGRON MORAN PEDRO LUIS", "Observaciones": ""},
+                {"N/L": "26", "RUN": "24206188-8", "Nombre": "NÚÑEZ ARAYA EMILIO IGNACIO", "Observaciones": ""},
+                {"N/L": "27", "RUN": "27219363-0", "Nombre": "NUÑEZ GUEVARA ANETTE SARAI", "Observaciones": "RET. 31/03/2025"},
+                {"N/L": "28", "RUN": "24366301-6", "Nombre": "OSORIO GODOY BENJAMIN ISRAEL", "Observaciones": ""},
+                {"N/L": "29", "RUN": "27003265-6", "Nombre": "PEREZ HERNANDEZ JUAN DAVID", "Observaciones": ""},
+                {"N/L": "30", "RUN": "27027981-3", "Nombre": "RAMIREZ CASTRO AMBERLY ISABELLA", "Observaciones": ""},
+                {"N/L": "31", "RUN": "27758165-5", "Nombre": "RAUSEO GUARIMAN SOPHIA ALEJANDRA", "Observaciones": ""},
+                {"N/L": "32", "RUN": "24448298-8", "Nombre": "RODRIGUEZ MELÉNDEZ MANUEL LUIS ANTONI", "Observaciones": ""},
+                {"N/L": "33", "RUN": "24385604-3", "Nombre": "SELLAO VELASQUEZ MAXIMILIANO ALEJANDRO", "Observaciones": ""},
+                {"N/L": "34", "RUN": "24724603-7", "Nombre": "TIZNADO SAN MARTIN AMANDA CATALINA ANDREA", "Observaciones": ""},
+                {"N/L": "35", "RUN": "24412441-0", "Nombre": "VARGAS ALARCÓN ANIBAL ALONSO", "Observaciones": ""},
+                {"N/L": "36", "RUN": "26176625-6", "Nombre": "VASQUEZ VALDERRAMA JHOAN ANDREW", "Observaciones": ""},
+                {"N/L": "37", "RUN": "26409549-2", "Nombre": "ZAMUDIO CABRERA FLAVIA VALERIA", "Observaciones": ""},
+                {"N/L": "38", "RUN": "24357477-3", "Nombre": "SAAVEDRA MUTIS GIOVANNI FERNANDO", "Observaciones": ""},
+                {"N/L": "39", "RUN": "26327632-9", "Nombre": "MILHOMME MARVENS", "Observaciones": ""},
+            ],
+            "7° básico A": [
+                {"N/L": "1", "RUN": "27656738-1", "Nombre": "ACOSTA ARIAS MATHIAS ENRIQUE", "Observaciones": ""},
+                {"N/L": "2", "RUN": "23919821-K", "Nombre": "AGUILA OLGUIN JORDAN ANDRÉS", "Observaciones": ""},
+                {"N/L": "3", "RUN": "100638006-5", "Nombre": "ALVAREZ GONZALEZ SILVANA PAOLA", "Observaciones": ""},
+                {"N/L": "4", "RUN": "100407879-5", "Nombre": "BENITES ROJAS NICOLA ALEXANDER DAHIRO", "Observaciones": ""},
+                {"N/L": "5", "RUN": "23518136-3", "Nombre": "CAMUS POBLETE DIDDIER NICOLAS FREDY", "Observaciones": ""},
+                {"N/L": "6", "RUN": "24145152-6", "Nombre": "CASTILLO PIZARRO FRANCISCA PAULINA", "Observaciones": "RET. 09/06/2025"},
+                {"N/L": "7", "RUN": "100374375-2", "Nombre": "EGUEZ MOGRE JOSE ANGEL", "Observaciones": "RET. 29/04/2025"},
+                {"N/L": "8", "RUN": "100552002-5", "Nombre": "ESCARAY ESCARAY LUIS ALEJANDRO", "Observaciones": ""},
+                {"N/L": "9", "RUN": "25722760-K", "Nombre": "FIGUERA CABRERA ARANZA ZOILET", "Observaciones": ""},
+                {"N/L": "10", "RUN": "23954547-5", "Nombre": "GOMEZ ALBA SANTIAGO AGUSTIN", "Observaciones": "RET. 11/06/2025"},
+                {"N/L": "11", "RUN": "100702993-0", "Nombre": "GONZALEZ FERNANDEZ JESUS MOISES", "Observaciones": ""},
+                {"N/L": "12", "RUN": "100727626-1", "Nombre": "HIDALGO FEREIRA SOFHIA NAZARETH", "Observaciones": ""},
+                {"N/L": "13", "RUN": "100755397-4", "Nombre": "LOZADA MENDOZA ANSHONY LORHAINE", "Observaciones": ""},
+                {"N/L": "14", "RUN": "100536120-2", "Nombre": "MARULANDA MOTATO BISMAR", "Observaciones": ""},
+                {"N/L": "15", "RUN": "27846851-8", "Nombre": "MEDINA LOPEZ FIORELLA DEL VALLE", "Observaciones": ""},
+                {"N/L": "16", "RUN": "23970215-5", "Nombre": "MEJÍAS AGUIRRE VICENTE IGNACIO", "Observaciones": ""},
+                {"N/L": "17", "RUN": "23955073-8", "Nombre": "MICHEA NAVARRO ANTHONY ELIAS MAXIMILIANO", "Observaciones": ""},
+                {"N/L": "18", "RUN": "26897579-9", "Nombre": "NAVA ANDRADE SOPHIA VICTORIA", "Observaciones": ""},
+                {"N/L": "19", "RUN": "26743787-4", "Nombre": "NUÑEZ MALAVE SAMUEL SANTIAGO", "Observaciones": ""},
+                {"N/L": "20", "RUN": "27459080-7", "Nombre": "PAZO ENTRENA JULIETA VICTORIA", "Observaciones": ""},
+                {"N/L": "21", "RUN": "100640874-1", "Nombre": "PEREZ MUJICA JOHAN JAVIER", "Observaciones": ""},
+                {"N/L": "22", "RUN": "25968117-0", "Nombre": "PIÑA DE LA ROSA FERNANDO ALONSSO", "Observaciones": ""},
+                {"N/L": "23", "RUN": "23520803-2", "Nombre": "REYES TRAPEN VICTORIA ANTONELLA FERNANDA", "Observaciones": ""},
+                {"N/L": "24", "RUN": "26809593-4", "Nombre": "RINCON BERMUDEZ SHADERIT VALENTINA", "Observaciones": ""},
+                {"N/L": "25", "RUN": "23986531-3", "Nombre": "RODRIGUEZ MELÉNDEZ MADELINNE MARTINA", "Observaciones": ""},
+                {"N/L": "26", "RUN": "26158873-0", "Nombre": "SABATINO RODRIGUEZ FERNANDO JAVIER", "Observaciones": ""},
+                {"N/L": "27", "RUN": "24027387-K", "Nombre": "SAEZ CARTER NICOLE ADELEIN", "Observaciones": "RET. 31/03/2025"},
+                {"N/L": "28", "RUN": "27899201-2", "Nombre": "SOSA URDANETA MIA ESPERANZA", "Observaciones": ""},
+                {"N/L": "29", "RUN": "26576418-5", "Nombre": "VASQUEZ CARLOS MATHIAS CHRISTOPHER", "Observaciones": ""},
+                {"N/L": "30", "RUN": "28532411-4", "Nombre": "VELIS VERDE KENDHRA ANTONELLA", "Observaciones": ""},
+                {"N/L": "31", "RUN": "23532624-8", "Nombre": "VERGARA NORAMBUENA ANASTASIA RAQUEL", "Observaciones": ""},
+                {"N/L": "32", "RUN": "25894238-8", "Nombre": "VIDAL BRAND LUCIANA", "Observaciones": ""},
+                {"N/L": "33", "RUN": "26694543-4", "Nombre": "VILORIA MORILLO VICTORIA VALENTINA", "Observaciones": ""},
+                {"N/L": "34", "RUN": "26669422-9", "Nombre": "CALDERON CONTRERAS SOPHIA ALEXANDRA", "Observaciones": ""},
+                {"N/L": "35", "RUN": "23715728-1", "Nombre": "HERRERA GIBERT LUNA ABRIL", "Observaciones": ""},
+                {"N/L": "36", "RUN": "100795674-2", "Nombre": "FERNANDEZ QUISBERT ANGELO SANTIAGO", "Observaciones": ""},
+            ],
+            "8° básico A": [
+                {"N/L": "1", "RUN": "100774008-1", "Nombre": "ARMAS GAMES IRENE FABIANA", "Observaciones": ""},
+                {"N/L": "2", "RUN": "28523382-8", "Nombre": "AVILES ROMERO ALEXA PAOLA", "Observaciones": ""},
+                {"N/L": "3", "RUN": "27927834-8", "Nombre": "BARRIOS GONZALEZ YEFRIN MOISES", "Observaciones": ""},
+                {"N/L": "4", "RUN": "23861095-8", "Nombre": "CORNEJO HORMAZĀBAL CONSTANZA ALEXANDRA", "Observaciones": ""},
+                {"N/L": "5", "RUN": "100495117-0", "Nombre": "CORONADO SANCHEZ NESTOR ISAAC", "Observaciones": "RET. 13/03/2025"},
+                {"N/L": "6", "RUN": "100374358-2", "Nombre": "EGUEZ MOGRE LUIS GABRIEL", "Observaciones": "RET. 29/04/2025"},
+                {"N/L": "7", "RUN": "26743477-8", "Nombre": "FIGUEROA HERNANDEZ JUAN ANDRES", "Observaciones": ""},
+                {"N/L": "8", "RUN": "23782604-3", "Nombre": "GARCÍA CURIN NEYMIAS JESUS", "Observaciones": ""},
+                {"N/L": "9", "RUN": "26090612-7", "Nombre": "GARCIA MARTINEZ ZHANDRA PAHOLA", "Observaciones": ""},
+                {"N/L": "10", "RUN": "25818031-3", "Nombre": "GARCIA PERDOMO SILVANA ANTONELLA", "Observaciones": ""},
+                {"N/L": "11", "RUN": "28480807-K", "Nombre": "GODOY MONTERO ARIADNA ALESANDRA", "Observaciones": ""},
+                {"N/L": "12", "RUN": "23811648-1", "Nombre": "MIRANDA BERRIOS ANNELI PASCALE", "Observaciones": ""},
+                {"N/L": "13", "RUN": "100528573-5", "Nombre": "MONSALVE OSORIO SANYHERITH SOPHIA", "Observaciones": ""},
+                {"N/L": "14", "RUN": "26441026-6", "Nombre": "MORA QUINTERO SAMUEL ALEJANDRO", "Observaciones": ""},
+                {"N/L": "15", "RUN": "23486034-8", "Nombre": "NAVARRO PASTENES EMILIA ANDREA", "Observaciones": ""},
+                {"N/L": "16", "RUN": "100500242-3", "Nombre": "PEÑA HERNANDEZ JOSÉ FABIAN", "Observaciones": ""},
+                {"N/L": "17", "RUN": "100500239-3", "Nombre": "PEÑA HERNÁNDEZ JOSÉ SEBASTIAN", "Observaciones": ""},
+                {"N/L": "18", "RUN": "100559925-K", "Nombre": "PERAZA FLORES KEISHABETT JULIETA", "Observaciones": ""},
+                {"N/L": "19", "RUN": "26036522-3", "Nombre": "PINILLOS MILLAN HECTOR ALEXIS", "Observaciones": ""},
+                {"N/L": "20", "RUN": "23665962-3", "Nombre": "RAMOS GONZALEZ DEANS EVENS ELIETH", "Observaciones": ""},
+                {"N/L": "21", "RUN": "25489665-9", "Nombre": "RIVAS CHAU ARIANA CAMILA", "Observaciones": ""},
+                {"N/L": "22", "RUN": "100555798-0", "Nombre": "RODRIGUEZ LOPEZ JOSEANNY DAYERLIN", "Observaciones": ""},
+                {"N/L": "23", "RUN": "23991639-2", "Nombre": "ROJAS NARANJO SOFIA AMARAL", "Observaciones": ""},
+                {"N/L": "24", "RUN": "100516439-3", "Nombre": "SANCHEZ HERNANDEZ YOHALIS FABIANA DEL CARMEN", "Observaciones": ""},
+                {"N/L": "25", "RUN": "23727308-7", "Nombre": "SOTOMAYOR QUIMIZ JOISE PATRICIA", "Observaciones": ""},
+                {"N/L": "26", "RUN": "26369995-5", "Nombre": "SUAREZ URQUIOLA FABIAN ALEJANDRO", "Observaciones": ""},
+                {"N/L": "27", "RUN": "23889954-0", "Nombre": "TIZNADO SAN MARTIN SEBASTIAN IGNACIO ANDRÉS", "Observaciones": ""},
+                {"N/L": "28", "RUN": "28277678-2", "Nombre": "MARTINEZ SOTO ZOE ANTHONELLA", "Observaciones": ""},
+                {"N/L": "29", "RUN": "23491740-4", "Nombre": "PAVEZ PEREIRA JOAQUIN ALONSO", "Observaciones": ""},
+                {"N/L": "30", "RUN": "26467125-6", "Nombre": "SALAS KHASSALE CRISTIAN ELIAS", "Observaciones": ""},
+            ]
+        };
+
+        // Function to organize students into groups
+        function organizeIntoGroups(students) {
+            // Filter out retired students
+            const activeStudents = students.filter(student => !student.Observaciones.includes("RET."));
+            const numStudents = activeStudents.length;
+            const groupSize = Math.floor(numStudents / 3);
+            const remainder = numStudents % 3;
+
+            const groups = {
+                G1: [],
+                G2: [],
+                G3: []
+            };
+
+            let studentIndex = 0;
+
+            // Distribute students into groups
+            for (let i = 0; i < groupSize; i++) {
+                groups.G1.push(activeStudents[studentIndex++]);
+                groups.G2.push(activeStudents[studentIndex++]);
+                groups.G3.push(activeStudents[studentIndex++]);
+            }
+
+            // Distribute remaining students
+            if (remainder === 1) {
+                groups.G1.push(activeStudents[studentIndex++]);
+            } else if (remainder === 2) {
+                groups.G1.push(activeStudents[studentIndex++]);
+                groups.G2.push(activeStudents[studentIndex++]);
+            }
+
+            return groups;
+        }
+
+        // Function to render groups for a course
+        function renderCourseGroups(courseName, students) {
+            const groups = organizeIntoGroups(students);
+            let html = '';
+            for (const groupName in groups) {
+                html += `
+                    <div class="mb-6">
+                        <button class="accordion-header w-full text-left py-3 px-4 bg-indigo-100 hover:bg-indigo-200 rounded-lg flex justify-between items-center shadow-md">
+                            <span class="font-semibold text-lg text-indigo-800">${groupName} (${groups[groupName].length} estudiantes)</span>
+                            <svg class="w-5 h-5 text-indigo-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content bg-indigo-50 rounded-b-lg shadow-inner">
+                            <ul class="list-disc pl-8 pr-4 py-2">
+                                ${groups[groupName].map(student => `<li class="py-1 text-gray-700">${student.Nombre} (RUT: ${student.RUN})</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            return html;
+        }
+
+        // JavaScript function to filter the table based on selected criteria
+        function filtrarTabla() {
+            // Get filter values, converting them to lowercase for case-insensitive comparison
+            const tipo = document.getElementById("tipoFiltro").value.toLowerCase();
+            const curso = document.getElementById("cursoFiltro").value.toLowerCase();
+            const dia = document.getElementById("diaFiltro").value.toLowerCase();
+
+            // Select all table rows within the tbody
+            const filas = document.querySelectorAll("#tablaCronograma tbody tr");
+
+            // Iterate over each row to apply filtering
+            filas.forEach(fila => {
+                // Get the full text content of the row and convert to lowercase
+                const textoFila = fila.textContent.toLowerCase();
+
+                // Determine if the row should be displayed based on all filters
+                const mostrar =
+                    (tipo === "todos" || textoFila.includes(tipo)) && // Filter by type
+                    (curso === "todos" || textoFila.includes(curso)) && // Filter by course
+                    (dia === "todos" || textoFila.includes(dia)); // Filter by day/week
+
+                // Set the display style of the row
+                fila.style.display = mostrar ? "" : "none";
+            });
+        }
+
+        // Function to attach accordion listeners
+        function attachAccordionListeners() {
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                // Remove any existing click listeners to prevent duplicates
+                header.onclick = null;
+                header.onclick = function() {
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('svg');
+
+                    // Toggle 'active' class on content for height transition
+                    content.classList.toggle('active');
+
+                    // Rotate arrow icon
+                    if (content.classList.contains('active')) {
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                };
+            });
+        }
+
+        // Main tab switching logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtonsContainer = document.getElementById('main-tab-buttons');
+            const tabContentContainer = document.getElementById('main-tab-content');
+
+            // Initial setup for student distribution tabs
+            const studentTabButtonsContainer = document.getElementById('student-tab-buttons');
+            const studentTabContentContainer = document.getElementById('student-tab-content');
+            let firstCourse = true;
+
+            for (const courseName in coursesData) {
+                // Create tab button for student distribution
+                const button = document.createElement('button');
+                button.className = `tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 ${firstCourse ? 'active bg-indigo-700 text-white' : 'text-indigo-700 hover:bg-indigo-100'}`;
+                button.textContent = courseName;
+                button.setAttribute('data-course', courseName);
+                studentTabButtonsContainer.appendChild(button);
+
+                // Create tab content for student distribution
+                const contentDiv = document.createElement('div');
+                contentDiv.id = `student-content-${courseName.replace(/\s/g, '-')}`;
+                contentDiv.className = `tab-pane ${firstCourse ? 'block' : 'hidden'}`;
+                contentDiv.innerHTML = renderCourseGroups(courseName, coursesData[courseName]);
+                studentTabContentContainer.appendChild(contentDiv);
+
+                firstCourse = false;
+            }
+
+            // Event listener for main tabs (Cronograma and Distribución)
+            tabButtonsContainer.addEventListener('click', (event) => {
+                const clickedButton = event.target.closest('.main-tab-button');
+                if (!clickedButton) return;
+
+                // Remove 'active' class from all main buttons and hide all main contents
+                document.querySelectorAll('.main-tab-button').forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-700', 'text-white');
+                    btn.classList.add('text-indigo-700', 'hover:bg-indigo-100');
+                });
+                document.querySelectorAll('.main-tab-pane').forEach(pane => pane.classList.add('hidden'));
+
+                // Add 'active' class to the clicked main button and show its content
+                clickedButton.classList.add('active', 'bg-indigo-700', 'text-white');
+                clickedButton.classList.remove('text-indigo-700', 'hover:bg-indigo-100');
+                const targetTab = clickedButton.getAttribute('data-tab');
+                document.getElementById(targetTab).classList.remove('hidden');
+
+                // If the "Distribución de Estudiantes" tab is active, activate its first course tab and attach accordion listeners
+                if (targetTab === 'student-distribution-tab') {
+                    if (studentTabButtonsContainer.firstElementChild) {
+                        studentTabButtonsContainer.firstElementChild.click(); // This will also call attachAccordionListeners
+                    }
+                }
+            });
+
+            // Event listener for student distribution sub-tabs
+            studentTabButtonsContainer.addEventListener('click', (event) => {
+                const clickedButton = event.target.closest('.tab-button');
+                if (!clickedButton) return;
+
+                // Remove 'active' class from all student sub-tab buttons and hide all student sub-tab contents
+                document.querySelectorAll('#student-tab-buttons .tab-button').forEach(btn => {
+                    btn.classList.remove('active', 'bg-indigo-700', 'text-white');
+                    btn.classList.add('text-indigo-700', 'hover:bg-indigo-100');
+                });
+                document.querySelectorAll('#student-tab-content .tab-pane').forEach(pane => pane.classList.add('hidden'));
+
+                // Add 'active' class to the clicked student sub-tab button and show its content
+                clickedButton.classList.add('active', 'bg-indigo-700', 'text-white');
+                clickedButton.classList.remove('text-indigo-700', 'hover:bg-indigo-100');
+                const targetCourse = clickedButton.getAttribute('data-course');
+                document.getElementById(`student-content-${targetCourse.replace(/\s/g, '-')}`).classList.remove('hidden');
+
+                // Re-attach accordion listeners for the active student tab
+                attachAccordionListeners();
+            });
+
+            // Activate the first main tab (Cronograma) on page load
+            if (tabButtonsContainer.firstElementChild) {
+                tabButtonsContainer.firstElementChild.click();
+            }
+        });
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-6 sm:p-8 md:p-10">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-indigo-700 mb-2">Gestión de Cronogramas y Estudiantes</h1>
+        <h2 class="text-xl sm:text-2xl text-center text-gray-600 mb-8">Organiza tus horarios y grupos de manera eficiente</h2>
+
+        <!-- Main Tab Buttons -->
+        <div id="main-tab-buttons" class="flex flex-wrap justify-center mb-6 border-b-2 border-indigo-200">
+            <button class="main-tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 active bg-indigo-700 text-white" data-tab="cronograma-tab">
+                Cronograma DIA
+            </button>
+            <button class="main-tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 text-indigo-700 hover:bg-indigo-100" data-tab="student-distribution-tab">
+                Distribución de Estudiantes
+            </button>
+        </div>
+
+        <!-- Main Tab Content -->
+        <div id="main-tab-content">
+            <!-- Cronograma DIA Tab Content -->
+            <div id="cronograma-tab" class="main-tab-pane block">
+                <h2 class="text-xl sm:text-2xl text-center text-gray-600 mb-8">Periodo: Martes 29 de julio al Miércoles 13 de agosto de 2025</h2>
+
+                <!-- Filter Section -->
+                <div class="filtros flex flex-wrap justify-center items-center gap-4 mb-8 p-4 bg-indigo-50 rounded-lg shadow-md">
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <label for="tipoFiltro" class="font-semibold text-indigo-700">Filtrar por tipo de evaluación:</label>
+                        <select id="tipoFiltro" onchange="filtrarTabla()"
+                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                            <option value="todos">Todos</option>
+                            <option value="lectura">Lectura</option>
+                            <option value="matemática">Matemática</option>
+                            <option value="socioem">Socioemocional</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <label for="cursoFiltro" class="font-semibold text-indigo-700">Filtrar por curso:</label>
+                        <select id="cursoFiltro" onchange="filtrarTabla()"
+                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                            <option value="todos">Todos</option>
+                            <option value="2°a">2°A</option>
+                            <option value="3°a">3°A</option>
+                            <option value="4°a">4°A</option>
+                            <option value="5°a">5°A</option>
+                            <option value="6°a">6°A</option>
+                            <option value="7°a">7°A</option>
+                            <option value="8°a">8°A</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <label for="diaFiltro" class="font-semibold text-indigo-700">Filtrar por día/semana:</label>
+                        <select id="diaFiltro" onchange="filtrarTabla()"
+                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
+                            <option value="todos">Todos</option>
+                            <option value="lunes">Lunes</option>
+                            <option value="martes">Martes</option>
+                            <option value="miércoles">Miércoles</option>
+                            <option value="jueves">Jueves</option>
+                            <option value="viernes">Viernes</option>
+                            <option value="semana 1">Semana 1</option>
+                            <option value="semana 2">Semana 2</option>
+                            <option value="semana 3">Semana 3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl sm:text-3xl font-semibold text-center text-indigo-700 mb-6">Gráfico de Gantt</h2>
+
+                <!-- Table Section -->
+                <div class="overflow-x-auto rounded-lg shadow-xl">
+                    <table id="tablaCronograma" class="min-w-full divide-y divide-indigo-200">
+                        <thead class="bg-indigo-600">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider rounded-tl-lg">Semana/Día</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B1</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B2</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B3 (45min)</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider rounded-tr-lg">B4 (45min)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Table Rows -->
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Martes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G1 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G2 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Miércoles</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Jueves</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Matemática</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Viernes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Matemática</td>
+                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">4°A G3 Socioem.</td>
+                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">5°A G1 Socioem.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Lunes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G2 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G1 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G2 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Martes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G2 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G3 Matemática</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Miércoles</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G2 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G3 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G1 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Jueves</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G2 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G1 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G2 Lectura</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Viernes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G3 Lectura</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G1 Matemática</td>
+                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">7°A G2 Socioem.</td>
+                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">7°A G3 Socioem.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Lunes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G1 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G2 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G3 Matemática</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G1 Socioem.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Martes</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G2 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G3 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Socioem.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Miércoles</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Socioem.</td>
+                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G3 Socioem.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Legend Section -->
+                <div class="leyenda mt-8 p-6 bg-gray-100 rounded-xl shadow-md text-gray-700">
+                    <strong class="text-lg font-semibold text-indigo-700">Leyenda:</strong>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li>
+                            <span class="inline-block w-6 h-4 bg-green-100 rounded-sm mr-2 align-middle"></span>
+                            <span class="align-middle">Bloque largo (90 minutos)</span>
+                        </li>
+                        <li>
+                            <span class="inline-block w-6 h-4 bg-yellow-100 rounded-sm mr-2 align-middle"></span>
+                            <span class="align-middle">Bloque corto (45 minutos, solo viernes)</span>
+                        </li>
+                        <li class="mt-4 text-sm text-gray-600">Utiliza los filtros para ver el cronograma por tipo de evaluación, curso y día o semana.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Student Distribution Tab Content -->
+            <div id="student-distribution-tab" class="main-tab-pane hidden">
+                <h2 class="text-2xl sm:text-3xl font-semibold text-center text-indigo-700 mb-6">Organizador de Grupos por Curso</h2>
+
+                <!-- Tab buttons for courses (student distribution) -->
+                <div id="student-tab-buttons" class="flex flex-wrap justify-center mb-6 border-b-2 border-indigo-200">
+                    <!-- Tab buttons for courses will be generated here by JavaScript -->
+                </div>
+
+                <!-- Container for tab content (student groups) -->
+                <div id="student-tab-content">
+                    <!-- Tab content (student groups) will be generated here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
