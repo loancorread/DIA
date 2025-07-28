@@ -3,41 +3,735 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cronograma DIA y Distribución de Estudiantes</title>
-    <!-- Inter font from Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Aplicación DIA Intermedio</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles for Inter font and general body defaults */
+        /* Custom styles for Inter font and general body styling */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            color: #334155; /* Darker text color */
         }
-        /* Ensure select boxes have consistent styling */
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1.5rem 1.5rem;
-            padding-right: 2.5rem; /* Space for the custom arrow */
+        /* Style for table headers */
+        th {
+            background-color: #3b82f6; /* Blue-500 for headers */
+            color: white;
         }
-        /* Accordion specific styles */
+        /* Style for alternating table rows */
+        tr:nth-child(even) {
+            background-color: #e0f2fe; /* Light blue-100 */
+        }
+        tr:nth-child(odd) {
+            background-color: #ffffff; /* White */
+        }
+        /* Hover effect for rows */
+        tr:hover {
+            background-color: #bfdbfe; /* Blue-200 on hover */
+        }
+        /* The .hidden class should only be applied by JavaScript for filtering */
+        .hidden {
+            display: none !important; /* Ensures display: none overrides other styles */
+        }
+
+        /* Styles for the new tab system */
+        .main-tab-button {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .main-tab-button.active {
+            background-color: #4f46e5; /* Indigo-700 */
+            color: white;
+            border-bottom: 2px solid #4f46e5;
+        }
+        .main-tab-content {
+            padding-top: 1rem;
+        }
+
+        /* Styles for student breakdown accordion */
+        .accordion-header {
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        .accordion-header:hover {
+            background-color: #e0e7ff; /* Indigo-200 */
+        }
         .accordion-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-out, padding 0.5s ease-out;
         }
         .accordion-content.active {
-            max-height: 1000px; /* Sufficiently large to contain the content */
+            max-height: 1000px; /* Large enough to contain content */
             padding-top: 1rem;
             padding-bottom: 1rem;
         }
     </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-10">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-blue-700 mb-8">
+            Aplicación DIA Intermedio
+        </h1>
+        <p class="text-lg text-gray-600 mb-4 text-center">
+            Escuela Intercultural Kallfü Mapu
+        </p>
+        <p class="text-lg text-gray-700 font-semibold mb-8 text-center">
+            Fechas de aplicación: Miércoles 30 de julio al Miércoles 13 de agosto de 2025
+        </p>
+
+        <!-- Main Tab Navigation -->
+        <div class="flex justify-center mb-6 border-b-2 border-blue-200">
+            <button id="scheduleTabBtn" class="main-tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none active bg-blue-700 text-white">
+                Cronograma
+            </button>
+            <button id="studentBreakdownTabBtn" class="main-tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none text-blue-700 hover:bg-blue-100">
+                Desglose de Estudiantes
+            </button>
+        </div>
+
+        <!-- Tab Content Containers -->
+        <div id="scheduleTabContent" class="main-tab-content">
+            <!-- Filter controls (existing) -->
+            <div class="flex flex-wrap gap-4 mb-8 justify-center">
+                <div class="flex flex-col">
+                    <label for="filterCourse" class="text-sm font-medium text-gray-700 mb-1">Filtrar por Curso:</label>
+                    <select id="filterCourse" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Todos">Todos los Cursos</option>
+                        <option value="2° Básico">2° Básico</option>
+                        <option value="3° Básico">3° Básico</option>
+                        <option value="4° Básico">4° Básico</option>
+                        <option value="5° Básico">5° Básico</option>
+                        <option value="6° Básico">6° Básico</option>
+                        <option value="7° Básico">7° Básico</option>
+                        <option value="8° Básico">8° Básico</option>
+                        <option value="Pendientes">Pendientes</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="filterDay" class="text-sm font-medium text-gray-700 mb-1">Filtrar por Día:</label>
+                    <select id="filterDay" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Todos">Todos los Días</option>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="filterWeek" class="text-sm font-medium text-gray-700 mb-1">Filtrar por Semana:</label>
+                    <select id="filterWeek" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Todos">Todas las Semanas</option>
+                        <option value="1">Semana 1</option>
+                        <option value="2">Semana 2</option>
+                        <option value="3">Semana 3</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="filterEvaluation" class="text-sm font-medium text-gray-700 mb-1">Filtrar por Evaluación:</label>
+                    <select id="filterEvaluation" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Todos">Todas las Evaluaciones</option>
+                        <option value="Lectura">Lectura</option>
+                        <option value="Matemática">Matemática</option>
+                        <option value="Socioemocional">Socioemocional</option>
+                        <option value="Pendientes">Pendientes</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="filterFormat" class="text-sm font-medium text-gray-700 mb-1">Filtrar por Formato:</label>
+                    <select id="filterFormat" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Todos">Todos los Formatos</option>
+                        <option value="Digital">Digital</option>
+                        <option value="Papel">Papel</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="filterLocation" class="text-sm font-medium text-gray-700 mb-1">Filtrar por Lugar:</label>
+                    <select id="filterLocation" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Todos">Todos los Lugares</option>
+                        <option value="Laboratorio">Laboratorio</option>
+                        <option value="Sala de Clases">Sala de Clases</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Week 1 Section -->
+            <div class="mb-12 week-section" data-week-number="1">
+                <h2 class="text-2xl sm:text-3xl font-bold text-blue-600 mb-6 border-b-2 border-blue-300 pb-2">
+                    Semana 1
+                </h2>
+
+                <!-- Day 1: Miércoles 30 de julio -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Miércoles" data-full-date="2025-07-30" data-week-number="1">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 1: Miércoles 30 de julio</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="2° Básico G1" data-course-base="2° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">2° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="2° Básico G2" data-course-base="2° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">2° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="2° Básico G3" data-course-base="2° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">2° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="3° Básico G1" data-course-base="3° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">3° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Day 2: Jueves 31 de julio -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Jueves" data-full-date="2025-07-31" data-week-number="1">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 2: Jueves 31 de julio</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="3° Básico G2" data-course-base="3° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">3° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="3° Básico G3" data-course-base="3° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">3° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="4° Básico G1" data-course-base="4° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">4° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="4° Básico G2" data-course-base="4° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">4° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Day 3: Viernes 1 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Viernes" data-full-date="2025-08-01" data-week-number="1">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 3: Viernes 1 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="4° Básico G3" data-course-base="4° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">4° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="5° Básico G1" data-course-base="5° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:00 - 11:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">5° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Week 2 Section -->
+            <div class="mb-12 week-section" data-week-number="2">
+                <h2 class="text-2xl sm:text-3xl font-bold text-blue-600 mb-6 border-b-2 border-blue-300 pb-2">
+                    Semana 2
+                </h2>
+
+                <!-- Day 4: Lunes 4 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Lunes" data-full-date="2025-08-04" data-week-number="2">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 4: Lunes 4 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="5° Básico G2" data-course-base="5° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">5° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="5° Básico G3" data-course-base="5° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">5° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="3° Básico G1" data-course-base="3° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">3° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="3° Básico G2" data-course-base="3° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">3° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Day 5: Martes 5 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Martes" data-full-date="2025-08-05" data-week-number="2">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 5: Martes 5 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="3° Básico G3" data-course-base="3° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">3° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="4° Básico G1" data-course-base="4° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">4° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="4° Básico G2" data-course-base="4° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">4° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="4° Básico G3" data-course-base="4° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">4° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Day 6: Miércoles 6 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Miércoles" data-full-date="2025-08-06" data-week-number="2">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 6: Miércoles 6 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="5° Básico G1" data-course-base="5° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">5° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="5° Básico G2" data-course-base="5° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">5° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="5° Básico G3" data-course-base="5° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">5° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="6° Básico G1" data-course-base="6° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">6° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Day 7: Jueves 7 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Jueves" data-full-date="2025-08-07" data-week-number="2">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 7: Jueves 7 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="6° Básico G2" data-course-base="6° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">6° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="6° Básico G3" data-course-base="6° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">6° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="7° Básico G1" data-course-base="7° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">7° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="7° Básico G2" data-course-base="7° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">7° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Day 8: Viernes 8 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Viernes" data-full-date="2025-08-08" data-week-number="2">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 8: Viernes 8 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="7° Básico G3" data-course-base="7° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">7° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="8° Básico G1" data-course-base="8° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:00 - 11:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">8° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <!-- Socioemocional evaluations for 4th, 5th, 6th, 7th, and 8th grade (full course) -->
+                                <tr data-course="4° Básico" data-course-base="4° Básico" data-evaluation="Socioemocional" data-format="Papel" data-location="Sala de Clases">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:45 - 12:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">4° Básico</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Socioemocional</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Papel</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Sala de Clases</td>
+                                </tr>
+                                <tr data-course="5° Básico" data-course-base="5° Básico" data-evaluation="Socioemocional" data-format="Papel" data-location="Sala de Clases">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:45 - 12:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">5° Básico</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Socioemocional</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Papel</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Sala de Clases</td>
+                                </tr>
+                                <tr data-course="6° Básico" data-course-base="6° Básico" data-evaluation="Socioemocional" data-format="Papel" data-location="Sala de Clases">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:45 - 12:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">6° Básico</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Socioemocional</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Papel</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Sala de Clases</td>
+                                </tr>
+                                <tr data-course="7° Básico" data-course-base="7° Básico" data-evaluation="Socioemocional" data-format="Papel" data-location="Sala de Clases">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:45 - 12:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">7° Básico</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Socioemocional</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Papel</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Sala de Clases</td>
+                                </tr>
+                                <tr data-course="8° Básico" data-course-base="8° Básico" data-evaluation="Socioemocional" data-format="Papel" data-location="Sala de Clases">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:45 - 12:30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">8° Básico</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Socioemocional</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Papel</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Sala de Clases</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Week 3 Section -->
+            <div class="mb-12 week-section" data-week-number="3">
+                <h2 class="text-2xl sm:text-3xl font-bold text-blue-600 mb-6 border-b-2 border-blue-300 pb-2">
+                    Semana 3
+                </h2>
+
+                <!-- Day 9: Lunes 11 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Lunes" data-full-date="2025-08-11" data-week-number="3">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 9: Lunes 11 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="8° Básico G2" data-course-base="8° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">8° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="8° Básico G3" data-course-base="8° Básico" data-evaluation="Lectura" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">8° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Lectura</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="6° Básico G1" data-course-base="6° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">6° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="6° Básico G2" data-course-base="6° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">6° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Day 10: Martes 12 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Martes" data-full-date="2025-08-12" data-week-number="3">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 10: Martes 12 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="6° Básico G3" data-course-base="6° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">6° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="7° Básico G1" data-course-base="7° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">7° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="7° Básico G2" data-course-base="7° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">7° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="7° Básico G3" data-course-base="7° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">7° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Day 11: Miércoles 13 de agosto -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm day-block" data-day-name="Miércoles" data-full-date="2025-08-13" data-week-number="3">
+                    <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Día 11: Miércoles 13 de agosto</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Hora</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Curso y Grupo</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Evaluación</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Formato</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Lugar de Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr data-course="8° Básico G1" data-course-base="8° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">8:15 - 9:45</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">8° Básico G1</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="8° Básico G2" data-course-base="8° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">10:05 - 11:35</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">8° Básico G2</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="8° Básico G3" data-course-base="8° Básico" data-evaluation="Matemática" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">11:55 - 13:25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">8° Básico G3</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Matemática</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                                <tr data-course="Pendientes" data-course-base="Pendientes" data-evaluation="Pendientes" data-format="Digital" data-location="Laboratorio">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">14:10 - 15:40</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Pendientes</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Digital</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">Laboratorio</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Breakdown Tab Content -->
+        <div id="studentBreakdownTabContent" class="main-tab-content hidden">
+            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-600 mb-6 border-b-2 border-indigo-300 pb-2">
+                Desglose de Estudiantes por Curso
+            </h2>
+            <div class="flex flex-wrap justify-center mb-6 border-b-2 border-indigo-200" id="student-tab-buttons">
+                <!-- Course tab buttons will be generated here by JS -->
+            </div>
+            <div id="student-tab-content">
+                <!-- Student group content will be generated here by JS -->
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Data for student distribution by course
+        console.log('Script de cronograma cargado y ejecutándose.');
+
+        // --- Data for Student Breakdown (from Distribución Cursos.html) ---
         const coursesData = {
             "2º básico A": [
                 {"N/L": "1", "RUN": "26125945-1", "Nombre": "ACEVEDO MATAMALA JOSEFA ISIDORA", "Observaciones": ""},
@@ -318,7 +1012,7 @@
             ]
         };
 
-        // Function to organize students into groups
+        // Function to organize students into groups (from Distribución Cursos.html)
         function organizeIntoGroups(students) {
             // Filter out retired students
             const activeStudents = students.filter(student => !student.Observaciones.includes("RET."));
@@ -352,7 +1046,7 @@
             return groups;
         }
 
-        // Function to render groups for a course
+        // Function to render course groups (from Distribución Cursos.html)
         function renderCourseGroups(courseName, students) {
             const groups = organizeIntoGroups(students);
             let html = '';
@@ -373,342 +1067,253 @@
             }
             return html;
         }
+        // --- End of Data and Functions for Student Breakdown ---
 
-        // JavaScript function to filter the table based on selected criteria
-        function filtrarTabla() {
-            // Get filter values, converting them to lowercase for case-insensitive comparison
-            const tipo = document.getElementById("tipoFiltro").value.toLowerCase();
-            const curso = document.getElementById("cursoFiltro").value.toLowerCase();
-            const dia = document.getElementById("diaFiltro").value.toLowerCase();
 
-            // Select all table rows within the tbody
-            const filas = document.querySelectorAll("#tablaCronograma tbody tr");
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Evento DOMContentLoaded disparado. Inicializando filtros y pestañas...');
 
-            // Iterate over each row to apply filtering
-            filas.forEach(fila => {
-                // Get the full text content of the row and convert to lowercase
-                const textoFila = fila.textContent.toLowerCase();
+            // --- Main Tab Elements ---
+            const scheduleTabBtn = document.getElementById('scheduleTabBtn');
+            const studentBreakdownTabBtn = document.getElementById('studentBreakdownTabBtn');
+            const scheduleTabContent = document.getElementById('scheduleTabContent');
+            const studentBreakdownTabContent = document.getElementById('studentBreakdownTabContent');
 
-                // Determine if the row should be displayed based on all filters
-                const mostrar =
-                    (tipo === "todos" || textoFila.includes(tipo)) && // Filter by type
-                    (curso === "todos" || textoFila.includes(curso)) && // Filter by course
-                    (dia === "todos" || textoFila.includes(dia)); // Filter by day/week
+            // --- Schedule Filter Elements (existing) ---
+            const filterCourse = document.getElementById('filterCourse');
+            const filterDay = document.getElementById('filterDay');
+            const filterWeek = document.getElementById('filterWeek');
+            const filterEvaluation = document.getElementById('filterEvaluation');
+            const filterFormat = document.getElementById('filterFormat');
+            const filterLocation = document.getElementById('filterLocation');
+            const dayBlocks = document.querySelectorAll('.day-block');
+            const weekSections = document.querySelectorAll('.week-section');
 
-                // Set the display style of the row
-                fila.style.display = mostrar ? "" : "none";
-            });
-        }
-
-        // Function to attach accordion listeners
-        function attachAccordionListeners() {
-            document.querySelectorAll('.accordion-header').forEach(header => {
-                // Remove any existing click listeners to prevent duplicates
-                header.onclick = null;
-                header.onclick = function() {
-                    const content = this.nextElementSibling;
-                    const icon = this.querySelector('svg');
-
-                    // Toggle 'active' class on content for height transition
-                    content.classList.toggle('active');
-
-                    // Rotate arrow icon
-                    if (content.classList.contains('active')) {
-                        icon.style.transform = 'rotate(180deg)';
-                    } else {
-                        icon.style.transform = 'rotate(0deg)';
-                    }
-                };
-            });
-        }
-
-        // Main tab switching logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const tabButtonsContainer = document.getElementById('main-tab-buttons');
-            const tabContentContainer = document.getElementById('main-tab-content');
-
-            // Initial setup for student distribution tabs
+            // --- Student Breakdown Elements ---
             const studentTabButtonsContainer = document.getElementById('student-tab-buttons');
             const studentTabContentContainer = document.getElementById('student-tab-content');
-            let firstCourse = true;
 
-            for (const courseName in coursesData) {
-                // Create tab button for student distribution
-                const button = document.createElement('button');
-                button.className = `tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 ${firstCourse ? 'active bg-indigo-700 text-white' : 'text-indigo-700 hover:bg-indigo-100'}`;
-                button.textContent = courseName;
-                button.setAttribute('data-course', courseName);
-                studentTabButtonsContainer.appendChild(button);
+            console.log('Elementos de filtro y pestañas obtenidos.');
 
-                // Create tab content for student distribution
-                const contentDiv = document.createElement('div');
-                contentDiv.id = `student-content-${courseName.replace(/\s/g, '-')}`;
-                contentDiv.className = `tab-pane ${firstCourse ? 'block' : 'hidden'}`;
-                contentDiv.innerHTML = renderCourseGroups(courseName, coursesData[courseName]);
-                studentTabContentContainer.appendChild(contentDiv);
-
-                firstCourse = false;
-            }
-
-            // Event listener for main tabs (Cronograma and Distribución)
-            tabButtonsContainer.addEventListener('click', (event) => {
-                const clickedButton = event.target.closest('.main-tab-button');
-                if (!clickedButton) return;
-
-                // Remove 'active' class from all main buttons and hide all main contents
+            // Function to switch main tabs
+            function switchMainTab(activeTabId) {
+                // Deactivate all main tab buttons and hide all main tab content
                 document.querySelectorAll('.main-tab-button').forEach(btn => {
-                    btn.classList.remove('active', 'bg-indigo-700', 'text-white');
-                    btn.classList.add('text-indigo-700', 'hover:bg-indigo-100');
+                    btn.classList.remove('active', 'bg-blue-700', 'text-white');
+                    btn.classList.add('text-blue-700', 'hover:bg-blue-100');
                 });
-                document.querySelectorAll('.main-tab-pane').forEach(pane => pane.classList.add('hidden'));
+                document.querySelectorAll('.main-tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
 
-                // Add 'active' class to the clicked main button and show its content
-                clickedButton.classList.add('active', 'bg-indigo-700', 'text-white');
-                clickedButton.classList.remove('text-indigo-700', 'hover:bg-indigo-100');
-                const targetTab = clickedButton.getAttribute('data-tab');
-                document.getElementById(targetTab).classList.remove('hidden');
-
-                // If the "Distribución de Estudiantes" tab is active, activate its first course tab and attach accordion listeners
-                if (targetTab === 'student-distribution-tab') {
-                    if (studentTabButtonsContainer.firstElementChild) {
-                        studentTabButtonsContainer.firstElementChild.click(); // This will also call attachAccordionListeners
-                    }
+                // Activate the selected tab button and show its content
+                if (activeTabId === 'scheduleTabContent') {
+                    scheduleTabBtn.classList.add('active', 'bg-blue-700', 'text-white');
+                    scheduleTabBtn.classList.remove('text-blue-700', 'hover:bg-blue-100');
+                    scheduleTabContent.classList.remove('hidden');
+                    // Re-apply filters when schedule tab is activated
+                    applyScheduleFilters();
+                } else if (activeTabId === 'studentBreakdownTabContent') {
+                    studentBreakdownTabBtn.classList.add('active', 'bg-blue-700', 'text-white');
+                    studentBreakdownTabBtn.classList.remove('text-blue-700', 'hover:bg-blue-100');
+                    studentBreakdownTabContent.classList.remove('hidden');
+                    // Initialize or re-initialize student breakdown content
+                    initializeStudentBreakdownTabs();
                 }
-            });
-
-            // Event listener for student distribution sub-tabs
-            studentTabButtonsContainer.addEventListener('click', (event) => {
-                const clickedButton = event.target.closest('.tab-button');
-                if (!clickedButton) return;
-
-                // Remove 'active' class from all student sub-tab buttons and hide all student sub-tab contents
-                document.querySelectorAll('#student-tab-buttons .tab-button').forEach(btn => {
-                    btn.classList.remove('active', 'bg-indigo-700', 'text-white');
-                    btn.classList.add('text-indigo-700', 'hover:bg-indigo-100');
-                });
-                document.querySelectorAll('#student-tab-content .tab-pane').forEach(pane => pane.classList.add('hidden'));
-
-                // Add 'active' class to the clicked student sub-tab button and show its content
-                clickedButton.classList.add('active', 'bg-indigo-700', 'text-white');
-                clickedButton.classList.remove('text-indigo-700', 'hover:bg-indigo-100');
-                const targetCourse = clickedButton.getAttribute('data-course');
-                document.getElementById(`student-content-${targetCourse.replace(/\s/g, '-')}`).classList.remove('hidden');
-
-                // Re-attach accordion listeners for the active student tab
-                attachAccordionListeners();
-            });
-
-            // Activate the first main tab (Cronograma) on page load
-            if (tabButtonsContainer.firstElementChild) {
-                tabButtonsContainer.firstElementChild.click();
             }
+
+            // --- Schedule Filter Logic (modified to be a function) ---
+            function applyScheduleFilters() {
+                console.log('Iniciando applyScheduleFilters()...');
+                const selectedCourse = filterCourse.value;
+                const selectedDay = filterDay.value;
+                const selectedWeek = filterWeek.value;
+                const selectedEvaluation = filterEvaluation.value;
+                const selectedFormat = filterFormat.value;
+                const selectedLocation = filterLocation.value;
+
+                console.log(`Filtros de Cronograma seleccionados: Curso=${selectedCourse}, Día=${selectedDay}, Semana=${selectedWeek}, Evaluación=${selectedEvaluation}, Formato=${selectedFormat}, Lugar=${selectedLocation}`);
+
+                weekSections.forEach(weekSection => {
+                    const weekNumber = weekSection.dataset.weekNumber;
+                    const showWeekSection = (selectedWeek === 'Todos' || selectedWeek === weekNumber);
+                    weekSection.classList.toggle('hidden', !showWeekSection);
+                });
+
+                dayBlocks.forEach(dayBlock => {
+                    const dayName = dayBlock.dataset.dayName;
+                    const weekNumber = dayBlock.dataset.weekNumber;
+                    let showDayBlockBasedOnFilters = true;
+
+                    const parentWeekSection = dayBlock.closest('.week-section');
+                    if (parentWeekSection && parentWeekSection.classList.contains('hidden')) {
+                        showDayBlockBasedOnFilters = false;
+                    }
+
+                    if (selectedDay !== 'Todos' && dayName !== selectedDay) {
+                        showDayBlockBasedOnFilters = false;
+                    }
+                    if (selectedWeek !== 'Todos' && weekNumber !== selectedWeek) {
+                        showDayBlockBasedOnFilters = false;
+                    }
+
+                    const rows = dayBlock.querySelectorAll('tbody tr');
+                    let dayBlockHasVisibleRows = false;
+
+                    rows.forEach(row => {
+                        const courseBase = row.dataset.courseBase;
+                        const evaluationType = row.dataset.evaluation;
+                        const formatType = row.dataset.format;
+                        const locationType = row.dataset.location;
+                        let showRow = true;
+
+                        if (selectedCourse !== 'Todos') {
+                            if (selectedCourse === 'Pendientes') {
+                                if (courseBase !== 'Pendientes') {
+                                    showRow = false;
+                                }
+                            } else {
+                                if (!courseBase.startsWith(selectedCourse)) {
+                                    showRow = false;
+                                }
+                            }
+                        }
+
+                        if (selectedEvaluation !== 'Todos') {
+                            if (selectedEvaluation === 'Pendientes') {
+                                if (evaluationType !== 'Pendientes') {
+                                    showRow = false;
+                                }
+                            } else if (evaluationType !== selectedEvaluation) {
+                                showRow = false;
+                            }
+                        }
+
+                        if (selectedFormat !== 'Todos' && formatType !== selectedFormat) {
+                            showRow = false;
+                        }
+
+                        if (selectedLocation !== 'Todos' && locationType !== selectedLocation) {
+                            showRow = false;
+                        }
+
+                        row.classList.toggle('hidden', !showRow);
+                        if (showRow) {
+                            dayBlockHasVisibleRows = true;
+                        }
+                    });
+
+                    const finalShowDayBlock = showDayBlockBasedOnFilters && dayBlockHasVisibleRows;
+                    dayBlock.classList.toggle('hidden', !finalShowDayBlock);
+                });
+
+                weekSections.forEach(weekSection => {
+                    if (!weekSection.classList.contains('hidden')) {
+                        const visibleDayBlocksInWeek = weekSection.querySelectorAll('.day-block:not(.hidden)');
+                        if (visibleDayBlocksInWeek.length === 0) {
+                            weekSection.classList.add('hidden');
+                        }
+                    }
+                });
+                console.log('Filtros de cronograma aplicados.');
+            }
+
+            // Add event listeners to schedule filters
+            filterCourse.addEventListener('change', applyScheduleFilters);
+            filterDay.addEventListener('change', applyScheduleFilters);
+            filterWeek.addEventListener('change', applyScheduleFilters);
+            filterEvaluation.addEventListener('change', applyScheduleFilters);
+            filterFormat.addEventListener('change', applyScheduleFilters);
+            filterLocation.addEventListener('change', applyScheduleFilters);
+
+            // --- Student Breakdown Tab Logic ---
+            function initializeStudentBreakdownTabs() {
+                // Clear previous content
+                studentTabButtonsContainer.innerHTML = '';
+                studentTabContentContainer.innerHTML = '';
+
+                let firstCourseStudentTab = true;
+
+                for (const courseName in coursesData) {
+                    // Create course tab button
+                    const button = document.createElement('button');
+                    button.className = `tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 ${firstCourseStudentTab ? 'active bg-indigo-700 text-white' : 'text-indigo-700 hover:bg-indigo-100'}`;
+                    button.textContent = courseName;
+                    button.setAttribute('data-course', courseName);
+                    studentTabButtonsContainer.appendChild(button);
+
+                    // Create course tab content
+                    const contentDiv = document.createElement('div');
+                    contentDiv.id = `content-${courseName.replace(/\s/g, '-')}`;
+                    contentDiv.className = `tab-pane ${firstCourseStudentTab ? 'block' : 'hidden'}`;
+                    contentDiv.innerHTML = renderCourseGroups(courseName, coursesData[courseName]);
+                    studentTabContentContainer.appendChild(contentDiv);
+
+                    firstCourseStudentTab = false;
+                }
+
+                // Add event listener for course tabs
+                studentTabButtonsContainer.addEventListener('click', (event) => {
+                    const clickedButton = event.target.closest('.tab-button');
+                    if (!clickedButton) return;
+
+                    // Remove 'active' class from all course buttons and hide all course contents
+                    document.querySelectorAll('#student-tab-buttons .tab-button').forEach(btn => {
+                        btn.classList.remove('active', 'bg-indigo-700', 'text-white');
+                        btn.classList.add('text-indigo-700', 'hover:bg-indigo-100');
+                    });
+                    document.querySelectorAll('#student-tab-content .tab-pane').forEach(pane => pane.classList.add('hidden'));
+
+                    // Add 'active' class to the clicked course button and show its content
+                    clickedButton.classList.add('active', 'bg-indigo-700', 'text-white');
+                    clickedButton.classList.remove('text-indigo-700', 'hover:bg-indigo-100');
+                    const targetCourse = clickedButton.getAttribute('data-course');
+                    document.getElementById(`content-${targetCourse.replace(/\s/g, '-')}`).classList.remove('hidden');
+
+                    // Re-attach accordion listeners for the active course tab
+                    attachAccordionListeners();
+                });
+
+                // Call the function to attach accordion listeners when the student breakdown tab loads
+                attachAccordionListeners();
+
+                // Activate the first course tab on load
+                if (studentTabButtonsContainer.firstElementChild) {
+                    studentTabButtonsContainer.firstElementChild.click();
+                }
+                console.log('Pestañas de desglose de estudiantes inicializadas.');
+            }
+
+            // Lógica para el acordeón (expandir/colapsar grupos) - This function is shared
+            function attachAccordionListeners() {
+                document.querySelectorAll('.accordion-header').forEach(header => {
+                    // Remove existing event listener to prevent duplicates
+                    header.onclick = null;
+                    header.onclick = function() {
+                        const content = this.nextElementSibling;
+                        const icon = this.querySelector('svg');
+
+                        // Toggle 'active' class on content for height transition
+                        content.classList.toggle('active');
+
+                        // Rotate arrow icon
+                        if (content.classList.contains('active')) {
+                            icon.style.transform = 'rotate(180deg)';
+                        } else {
+                            icon.style.transform = 'rotate(0deg)';
+                        }
+                    };
+                });
+            }
+
+            // --- Main Tab Event Listeners ---
+            scheduleTabBtn.addEventListener('click', () => switchMainTab('scheduleTabContent'));
+            studentBreakdownTabBtn.addEventListener('click', () => switchMainTab('studentBreakdownTabContent'));
+
+            // Initial activation of the schedule tab
+            switchMainTab('scheduleTabContent');
+            console.log('Pestaña inicial activada: Cronograma.');
         });
     </script>
-</head>
-<body class="bg-gray-50 text-gray-800 p-4 sm:p-6 md:p-8">
-
-    <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-6 sm:p-8 md:p-10">
-        <h1 class="text-3xl sm:text-4xl font-bold text-center text-indigo-700 mb-2">Aplicación Diagnóstico Integral de Aprendizajes</h1>
-        <h2 class="text-xl sm:text-2xl text-center text-gray-600 mb-8">Escuela Intercultural Kallfü Mapu</h2>
-
-        <!-- Main Tab Buttons -->
-        <div id="main-tab-buttons" class="flex flex-wrap justify-center mb-6 border-b-2 border-indigo-200">
-            <button class="main-tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 active bg-indigo-700 text-white" data-tab="cronograma-tab">
-                Cronograma DIA
-            </button>
-            <button class="main-tab-button py-3 px-6 rounded-t-lg text-lg font-medium focus:outline-none transition-all duration-300 text-indigo-700 hover:bg-indigo-100" data-tab="student-distribution-tab">
-                Distribución de Estudiantes
-            </button>
-        </div>
-
-        <!-- Main Tab Content -->
-        <div id="main-tab-content">
-            <!-- Cronograma DIA Tab Content -->
-            <div id="cronograma-tab" class="main-tab-pane block">
-                <h2 class="text-xl sm:text-2xl text-center text-gray-600 mb-8">Periodo: Martes 29 de julio al Miércoles 13 de agosto de 2025</h2>
-
-                <!-- Filter Section -->
-                <div class="filtros flex flex-wrap justify-center items-center gap-4 mb-8 p-4 bg-indigo-50 rounded-lg shadow-md">
-                    <div class="flex flex-col sm:flex-row items-center gap-2">
-                        <label for="tipoFiltro" class="font-semibold text-indigo-700">Filtrar por tipo de evaluación:</label>
-                        <select id="tipoFiltro" onchange="filtrarTabla()"
-                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
-                            <option value="todos">Todos</option>
-                            <option value="lectura">Lectura</option>
-                            <option value="matemática">Matemática</option>
-                            <option value="socioem">Socioemocional</option>
-                        </select>
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row items-center gap-2">
-                        <label for="cursoFiltro" class="font-semibold text-indigo-700">Filtrar por curso:</label>
-                        <select id="cursoFiltro" onchange="filtrarTabla()"
-                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
-                            <option value="todos">Todos</option>
-                            <option value="2°a">2°A</option>
-                            <option value="3°a">3°A</option>
-                            <option value="4°a">4°A</option>
-                            <option value="5°a">5°A</option>
-                            <option value="6°a">6°A</option>
-                            <option value="7°a">7°A</option>
-                            <option value="8°a">8°A</option>
-                        </select>
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row items-center gap-2">
-                        <label for="diaFiltro" class="font-semibold text-indigo-700">Filtrar por día/semana:</label>
-                        <select id="diaFiltro" onchange="filtrarTabla()"
-                            class="block w-full sm:w-auto px-4 py-2 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700">
-                            <option value="todos">Todos</option>
-                            <option value="lunes">Lunes</option>
-                            <option value="martes">Martes</option>
-                            <option value="miércoles">Miércoles</option>
-                            <option value="jueves">Jueves</option>
-                            <option value="viernes">Viernes</option>
-                            <option value="semana 1">Semana 1</option>
-                            <option value="semana 2">Semana 2</option>
-                            <option value="semana 3">Semana 3</option>
-                        </select>
-                    </div>
-                </div>
-
-                <h2 class="text-2xl sm:text-3xl font-semibold text-center text-indigo-700 mb-6">Organización</h2>
-
-                <!-- Table Section -->
-                <div class="overflow-x-auto rounded-lg shadow-xl">
-                    <table id="tablaCronograma" class="min-w-full divide-y divide-indigo-200">
-                        <thead class="bg-indigo-600">
-                            <tr>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider rounded-tl-lg">Semana/Día</th>
-                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B1</th>
-                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B2</th>
-                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">B3 (45min)</th>
-                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider rounded-tr-lg">B4 (45min)</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <!-- Table Rows -->
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Martes</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G1 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G2 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G3 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Lectura</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Miércoles</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Lectura</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Jueves</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G3 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Matemática</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 1 - Viernes</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Matemática</td>
-                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">4°A G3 Socioem.</td>
-                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">5°A G1 Socioem.</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Lunes</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G2 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G3 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G1 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G2 Lectura</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Martes</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G3 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G1 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G2 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">5°A G3 Matemática</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Miércoles</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G1 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G2 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">6°A G3 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G1 Lectura</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Jueves</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G2 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G3 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G1 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G2 Lectura</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 2 - Viernes</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G3 Lectura</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">7°A G1 Matemática</td>
-                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">7°A G2 Socioem.</td>
-                                <td class="bloque-corto px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-yellow-100 rounded-md">7°A G3 Socioem.</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Lunes</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G1 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G2 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">8°A G3 Matemática</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G1 Socioem.</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Martes</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G2 Socioem.</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">2°A G3 Socioem.</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G1 Socioem.</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G2 Socioem.</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">Semana 3 - Miércoles</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">3°A G3 Socioem.</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G1 Socioem.</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G2 Socioem.</td>
-                                <td class="bloque-largo px-4 py-3 whitespace-nowrap text-sm text-gray-800 bg-green-100 rounded-md">4°A G3 Socioem.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Legend Section -->
-                <div class="leyenda mt-8 p-6 bg-gray-100 rounded-xl shadow-md text-gray-700">
-                    <strong class="text-lg font-semibold text-indigo-700">Leyenda:</strong>
-                    <ul class="list-disc list-inside mt-2 space-y-2">
-                        <li>
-                            <span class="inline-block w-6 h-4 bg-green-100 rounded-sm mr-2 align-middle"></span>
-                            <span class="align-middle">Bloque largo (90 minutos)</span>
-                        </li>
-                        <li>
-                            <span class="inline-block w-6 h-4 bg-yellow-100 rounded-sm mr-2 align-middle"></span>
-                            <span class="align-middle">Bloque corto (45 minutos, solo viernes)</span>
-                        </li>
-                        <li class="mt-4 text-sm text-gray-600">Utiliza los filtros para ver el cronograma por tipo de evaluación, curso y día o semana.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Student Distribution Tab Content -->
-            <div id="student-distribution-tab" class="main-tab-pane hidden">
-                <h2 class="text-2xl sm:text-3xl font-semibold text-center text-indigo-700 mb-6">Desglose de grupos por curso</h2>
-
-                <!-- Tab buttons for courses (student distribution) -->
-                <div id="student-tab-buttons" class="flex flex-wrap justify-center mb-6 border-b-2 border-indigo-200">
-                    <!-- Tab buttons for courses will be generated here by JavaScript -->
-                </div>
-
-                <!-- Container for tab content (student groups) -->
-                <div id="student-tab-content">
-                    <!-- Tab content (student groups) will be generated here by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>
